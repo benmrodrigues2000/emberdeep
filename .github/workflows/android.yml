@@ -29,34 +29,87 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Unit tests, invariant fuzzing and balance simulation
-        run: ./gradlew --no-daemon :app:testDebugUnitTest
+        id: tests
+        continue-on-error: true
+        run: ./gradlew --no-daemon :app:testDebugUnitTest 2>&1 | tee ci-test-output.txt
 
       - name: Build debug APK, release APK and release AAB
+        id: build
+        if: steps.tests.outcome == 'success'
         run: ./gradlew --no-daemon :app:assembleDebug :app:assembleRelease :app:bundleRelease --stacktrace
 
       - name: Collect outputs
+        if: steps.build.outcome == 'success'
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk       dist/Emberdeep-debug.apk
-          cp app/build/outputs/apk/release/app-release.apk   dist/Emberdeep-release.apk
-          cp app/build/outputs/bundle/release/app-release.aab dist/Emberdeep-release.aab
+          cp app/build/outputs/apk/debug/app-debug.apk         dist/Emberdeep-debug.apk
+          cp app/build/outputs/apk/release/app-release.apk     dist/Emberdeep-release.apk
+          cp app/build/outputs/bundle/release/app-release.aab  dist/Emberdeep-release.aab
           ls -la dist/
 
+      # The runner's log storage is not always reachable from every
+      # environment, so the outcome is also published into the repository
+      # itself (ci/last-test-run.md + the raw log) where it is always readable.
+      - name: Publish CI report
+        if: always()
+        run: |
+          mkdir -p ci
+          {
+            echo "# Emberdeep CI report"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| commit | \`${GITHUB_SHA}\` |"
+            echo "| branch | \`${GITHUB_REF_NAME}\` |"
+            echo "| generated | $(date -u +%Y-%m-%dT%H:%M:%SZ) |"
+            echo "| unit tests | ${{ steps.tests.outcome }} |"
+            echo "| debug/release builds | ${{ steps.build.outcome }} |"
+            echo
+            echo "## Test failures"
+            echo
+            echo '```'
+            grep -h -A12 "<failure\|<error" app/build/test-results/testDebugUnitTest/*.xml 2>/dev/null | head -160 || true
+            echo '```'
+            echo
+            echo "## Compiler errors"
+            echo
+            echo '```'
+            grep -h "^e: " ci-test-output.txt 2>/dev/null | head -80 || true
+            echo '```'
+            echo
+            echo "## Balance simulation"
+            echo
+            echo '```'
+            grep -A30 "EMBERDEEP BALANCE SIMULATION" ci-test-output.txt 2>/dev/null | head -45 || true
+            echo '```'
+          } > ci/last-test-run.md
+          tail -c 120000 ci-test-output.txt > ci/last-test-output.txt 2>/dev/null || true
+
       - name: Upload artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: emberdeep-builds
-          path: dist/*
+          path: |
+            dist/*
+            ci/*
 
-      - name: Commit built APK/AAB back to branch
+      - name: Commit build outputs and CI report back to branch
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f dist/
+          git add -f dist/ ci/
           if git diff --cached --quiet; then
             echo "No build output changes."
           else
-            git commit -m "ci: update built APK/AAB [skip ci]"
+            git commit -m "ci: update built APK/AAB and test report [skip ci]"
             git pull --rebase origin "${GITHUB_REF_NAME}" || true
             git push origin HEAD:"${GITHUB_REF_NAME}"
           fi
+
+      - name: Fail the job when tests or builds failed
+        if: steps.tests.outcome == 'failure' || steps.build.outcome == 'failure'
+        run: |
+          echo "CI failed — see ci/last-test-run.md and ci/last-test-output.txt"
+          exit 1
