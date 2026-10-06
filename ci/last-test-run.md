@@ -2,35 +2,51 @@
 
 | | |
 |---|---|
-| commit | `335de54aea73df305f75550ee62bdbd485f9076c` |
+| commit | `10e509ce1ad20e80710a078213fbce77511d85b4` |
 | branch | `arena/5d7dde7e-emberdeep` |
-| generated | 2026-10-06T16:42:37Z |
+| generated | 2026-10-06T16:46:25Z |
 | unit tests (exit 1) | FAIL |
 | apk/aab build (exit 0) | pass |
 
 ## Test failures
 
 ```
-    <failure message="java.lang.AssertionError: seed 3237998083: run hit the turn cap&#10;&#10;================ EMBERDEEP BALANCE SIMULATION ================&#10;runs: 21   wins: 0   deaths: 12   timeouts: 9&#10;win rate: 0.0%   avg floor reached: 4.4   avg level: 3.8&#10;avg kills (finished runs): 13.5   avg turns: 837.0   avg gold: 90.0&#10;  Fighter  runs 7   wins 0   avg floor 4.4   avg level 4.0&#10;  Rogue    runs 7   wins 0   avg floor 3.4   avg level 2.3&#10;  Mage     runs 7   wins 0   avg floor 5.4   avg level 5.0&#10;deaths by floor: F2=2  F4=3  F5=1  F6=2  F7=1  F9=2  F10=1  &#10;==============================================================&#10;" type="java.lang.AssertionError">java.lang.AssertionError: seed 3237998083: run hit the turn cap
+    <failure message="java.lang.AssertionError: the dragon must be killable by a levelled hero with endgame gear (survived 59 turns, hero at 0/95 hp, dragon at 11 hp)" type="java.lang.AssertionError">java.lang.AssertionError: the dragon must be killable by a levelled hero with endgame gear (survived 59 turns, hero at 0/95 hp, dragon at 11 hp)
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
+	at com.emberdeep.game.sim.SimulationTest.a levelled and geared hero can kill the dragon(SimulationTest.kt:111)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+--
+    <failure message="java.lang.AssertionError: seed 3237998082: run hit the turn cap&#10;&#10;================ EMBERDEEP BALANCE SIMULATION ================&#10;runs: 21   wins: 0   deaths: 11   timeouts: 10&#10;win rate: 0.0%   avg floor reached: 4.2   avg level: 3.6&#10;avg kills (finished runs): 10.1   avg turns: 851.4   avg gold: 74.9&#10;  Fighter  runs 7   wins 0   avg floor 3.9   avg level 3.6&#10;  Rogue    runs 7   wins 0   avg floor 3.9   avg level 2.4&#10;  Mage     runs 7   wins 0   avg floor 4.9   avg level 4.7&#10;deaths by floor: F2=2  F4=3  F5=3  F6=2  F10=1  &#10;TIMEOUT seed=3237998082 Mage: floor=9 hero=(28,42) hp=55/60 level=8 kills=33 stairs=(41,42) pathToStairs=13 adjacentEnemies=0 visibleEnemies=0 awake=0 items=6 potions=14 rooms=11 walkable=557 | You push the old door open. / You pick up the Healing Potion. / You push the old door open. / You push the old door open.&#10;TIMEOUT seed=3237998085 Mage: floor=1 hero=(10,19) hp=18/18 level=1 kills=1 stairs=(19,27) pathToStairs=31 adjacentEnemies=0 visibleEnemies=0 awake=0 items=3 potions=1 rooms=7 walkable=341 | You push the old door open. / Your firebolt sears the Giant Rat for 14! / The Giant Rat is slain! / You pick up 10 gold.&#10;TIMEOUT seed=3237998088 Mage: floor=2 hero=(9,13) hp=30/30 level=3 kills=9 stairs=(9,4) pathToStairs=9 adjacentEnemies=0 visibleEnemies=0 awake=0 items=3 potions=4 rooms=8 walkable=356 | Your firebolt sears the Goblin for 16! / The Goblin is slain! / You pick up the Healing Potion. / You push the old door open.&#10;TIMEOUT seed=3237998091 Mage: floor=4 hero=(11,4) hp=36/36 level=4 kills=11 stairs=(5,4) pathToStairs=6 adjacentEnemies=0 visibleEnemies=0 awake=0 items=2 potions=7 rooms=9 walkable=442 | You push the old door open. / You pick up the Chain Mail. / You don the Chain Mail. / You pick up the Healing Potion.&#10;TIMEOUT seed=3237998092 Fighter: floor=2 hero=(22,28) hp=50/50 level=3 kills=7 stairs=(32,11) pathToStairs=27 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=2 rooms=8 walkable=377 | The Goblin is slain! / Welcome to level 3! Max HP +9, fully healed. / You pick up the Healing Potion. / You push the old door open.&#10;TIMEOUT seed=3237998094 Mage: floor=6 hero=(8,21) hp=48/48 level=6 kills=21 stairs=(8,35) pathToStairs=14 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=3 rooms=10 walkable=488 | You hit the Orc Brute for 12. / The Orc Brute is slain! / Welcome to level 6! Max HP +6, fully healed. / You pick up 16 gold.&#10;TIMEOUT seed=3237998095 Fighter: floor=3 hero=(14,21) hp=59/59 level=4 kills=11 stairs=(28,13) pathToStairs=22 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=1 rooms=8 walkable=349 | The Skeleton Archer misses you. / You hit the Skeleton Archer for 8. / The Skeleton Archer is slain! / Welcome to level 4! Max HP +9, fully healed.&#10;TIMEOUT seed=3237998098 Fighter: floor=2 hero=(13,34) hp=42/50 level=3 kills=7 stairs=(8,34) pathToStairs=5 adjacentEnemies=0 visibleEnemies=0 awake=0 items=1 potions=4 rooms=8 walkable=376 | You miss the Giant Rat. / The Giant Rat hits you for 2. / You hit the Giant Rat for 3. / The Giant Rat is slain!&#10;TIMEOUT seed=3237998099 Rogue: floor=4 hero=(28,10) hp=21/28 level=2 kills=6 stairs=(26,31) pathToStairs=37 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=4 rooms=9 walkable=483 | You pick up 28 gold. / You melt into shadow. Your next strike will be lethal. / You descend to floor 4 of the Emberdeep. / You push the old door open.&#10;TIMEOUT seed=3237998100 Mage: floor=2 hero=(22,11) hp=24/24 level=2 kills=5 stairs=(28,11) pathToStairs=6 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=2 rooms=8 walkable=420 | Your firebolt sears the Giant Rat for 10! / The Giant Rat is slain! / You pick up the Scroll of Blinking. / You pick up 7 gold.&#10;==============================================================&#10;" type="java.lang.AssertionError">java.lang.AssertionError: seed 3237998082: run hit the turn cap
 
 ================ EMBERDEEP BALANCE SIMULATION ================
-runs: 21   wins: 0   deaths: 12   timeouts: 9
-win rate: 0.0%   avg floor reached: 4.4   avg level: 3.8
-avg kills (finished runs): 13.5   avg turns: 837.0   avg gold: 90.0
-  Fighter  runs 7   wins 0   avg floor 4.4   avg level 4.0
-  Rogue    runs 7   wins 0   avg floor 3.4   avg level 2.3
-  Mage     runs 7   wins 0   avg floor 5.4   avg level 5.0
-deaths by floor: F2=2  F4=3  F5=1  F6=2  F7=1  F9=2  F10=1  
-==============================================================
-
-	at org.junit.Assert.fail(Assert.java:89)
-	at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
-	at com.emberdeep.game.sim.SimulationTest.the dungeon can be beaten and every run terminates(SimulationTest.kt:55)
+runs: 21   wins: 0   deaths: 11   timeouts: 10
+win rate: 0.0%   avg floor reached: 4.2   avg level: 3.6
+avg kills (finished runs): 10.1   avg turns: 851.4   avg gold: 74.9
+  Fighter  runs 7   wins 0   avg floor 3.9   avg level 3.6
+  Rogue    runs 7   wins 0   avg floor 3.9   avg level 2.4
+  Mage     runs 7   wins 0   avg floor 4.9   avg level 4.7
+deaths by floor: F2=2  F4=3  F5=3  F6=2  F10=1  
+TIMEOUT seed=3237998082 Mage: floor=9 hero=(28,42) hp=55/60 level=8 kills=33 stairs=(41,42) pathToStairs=13 adjacentEnemies=0 visibleEnemies=0 awake=0 items=6 potions=14 rooms=11 walkable=557 | You push the old door open. / You pick up the Healing Potion. / You push the old door open. / You push the old door open.
+TIMEOUT seed=3237998085 Mage: floor=1 hero=(10,19) hp=18/18 level=1 kills=1 stairs=(19,27) pathToStairs=31 adjacentEnemies=0 visibleEnemies=0 awake=0 items=3 potions=1 rooms=7 walkable=341 | You push the old door open. / Your firebolt sears the Giant Rat for 14! / The Giant Rat is slain! / You pick up 10 gold.
+TIMEOUT seed=3237998088 Mage: floor=2 hero=(9,13) hp=30/30 level=3 kills=9 stairs=(9,4) pathToStairs=9 adjacentEnemies=0 visibleEnemies=0 awake=0 items=3 potions=4 rooms=8 walkable=356 | Your firebolt sears the Goblin for 16! / The Goblin is slain! / You pick up the Healing Potion. / You push the old door open.
+TIMEOUT seed=3237998091 Mage: floor=4 hero=(11,4) hp=36/36 level=4 kills=11 stairs=(5,4) pathToStairs=6 adjacentEnemies=0 visibleEnemies=0 awake=0 items=2 potions=7 rooms=9 walkable=442 | You push the old door open. / You pick up the Chain Mail. / You don the Chain Mail. / You pick up the Healing Potion.
+TIMEOUT seed=3237998092 Fighter: floor=2 hero=(22,28) hp=50/50 level=3 kills=7 stairs=(32,11) pathToStairs=27 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=2 rooms=8 walkable=377 | The Goblin is slain! / Welcome to level 3! Max HP +9, fully healed. / You pick up the Healing Potion. / You push the old door open.
 --
-    <failure message="java.lang.AssertionError: expected a walkable floor (found 44)" type="java.lang.AssertionError">java.lang.AssertionError: expected a walkable floor (found 44)
+    <failure message="java.lang.AssertionError: every walkable tile must be reachable on a proved floor: expected 0 but was 1" type="java.lang.AssertionError">java.lang.AssertionError: every walkable tile must be reachable on a proved floor: expected 0 but was 1
 	at org.junit.Assert.fail(Assert.java:89)
-	at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
-	at com.emberdeep.game.systems.PathfinderTest.long searches on the biggest floors still find a route(PathfinderTest.kt:148)
+	at com.emberdeep.game.testutil.A.eq(A.kt:15)
+	at com.emberdeep.game.systems.PathfinderTest.long searches on the biggest floors still find a route(PathfinderTest.kt:149)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -57,43 +73,43 @@ w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdee
 
 ```
     ================ EMBERDEEP BALANCE SIMULATION ================
-    runs: 12   wins: 0   deaths: 7   timeouts: 5
-    win rate: 0.0%   avg floor reached: 5.1   avg level: 4.2
-    avg kills (finished runs): 14.9   avg turns: 815.2   avg gold: 103.3
-      Fighter  runs 4   wins 0   avg floor 4.8   avg level 3.8
-      Rogue    runs 4   wins 0   avg floor 5.0   avg level 3.5
-      Mage     runs 4   wins 0   avg floor 5.5   avg level 5.2
-    deaths by floor: F3=1  F4=2  F7=2  F8=1  F10=1  
+    runs: 12   wins: 1   deaths: 8   timeouts: 3
+    win rate: 8.3%   avg floor reached: 5.9   avg level: 4.6
+    avg kills (finished runs): 15.4   avg turns: 634.8   avg gold: 120.2
+      Fighter  runs 4   wins 0   avg floor 6.2   avg level 5.2
+      Rogue    runs 4   wins 0   avg floor 4.8   avg level 3.0
+      Mage     runs 4   wins 1   avg floor 6.8   avg level 5.5
+    deaths by floor: F2=1  F3=1  F4=1  F6=1  F7=2  F8=1  F10=1  
+    TIMEOUT seed=3789422594 Mage: floor=4 hero=(19,5) hp=30/30 level=3 kills=9 stairs=(31,15) pathToStairs=26 adjacentEnemies=0 visibleEnemies=0 awake=0 items=4 potions=4 rooms=9 walkable=366 | You push the old door open. / Your firebolt sears the Goblin for 8! / The Goblin burns to ash! / The Goblin is slain!
+    TIMEOUT seed=3789422598 Fighter: floor=6 hero=(30,21) hp=36/68 level=5 kills=16 stairs=(13,22) pathToStairs=50 adjacentEnemies=0 visibleEnemies=1 awake=1 items=4 potions=4 rooms=10 walkable=422 | The Skeleton Archer shoots you for 4. / You descend to floor 6 of the Emberdeep. / You pick up the Greater Healing. / You pick up the Greater Healing.
+    TIMEOUT seed=3789422601 Fighter: floor=4 hero=(29,25) hp=50/59 level=4 kills=12 stairs=(35,20) pathToStairs=21 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=1 rooms=9 walkable=437 | You pick up 12 gold. / You pick up 14 gold. / You push the old door open. / You descend to floor 4 of the Emberdeep.
     ==============================================================
 
 
 SimulationTest > twelve complete expeditions never break a structural invariant PASSED
 
 SimulationTest > the dungeon can be beaten and every run terminates FAILED
-    java.lang.AssertionError: seed 3237998083: run hit the turn cap
+    java.lang.AssertionError: seed 3237998082: run hit the turn cap
 
     ================ EMBERDEEP BALANCE SIMULATION ================
-    runs: 21   wins: 0   deaths: 12   timeouts: 9
-    win rate: 0.0%   avg floor reached: 4.4   avg level: 3.8
-    avg kills (finished runs): 13.5   avg turns: 837.0   avg gold: 90.0
-      Fighter  runs 7   wins 0   avg floor 4.4   avg level 4.0
-      Rogue    runs 7   wins 0   avg floor 3.4   avg level 2.3
-      Mage     runs 7   wins 0   avg floor 5.4   avg level 5.0
-    deaths by floor: F2=2  F4=3  F5=1  F6=2  F7=1  F9=2  F10=1  
+    runs: 21   wins: 0   deaths: 11   timeouts: 10
+    win rate: 0.0%   avg floor reached: 4.2   avg level: 3.6
+    avg kills (finished runs): 10.1   avg turns: 851.4   avg gold: 74.9
+      Fighter  runs 7   wins 0   avg floor 3.9   avg level 3.6
+      Rogue    runs 7   wins 0   avg floor 3.9   avg level 2.4
+      Mage     runs 7   wins 0   avg floor 4.9   avg level 4.7
+    deaths by floor: F2=2  F4=3  F5=3  F6=2  F10=1  
+    TIMEOUT seed=3237998082 Mage: floor=9 hero=(28,42) hp=55/60 level=8 kills=33 stairs=(41,42) pathToStairs=13 adjacentEnemies=0 visibleEnemies=0 awake=0 items=6 potions=14 rooms=11 walkable=557 | You push the old door open. / You pick up the Healing Potion. / You push the old door open. / You push the old door open.
+    TIMEOUT seed=3237998085 Mage: floor=1 hero=(10,19) hp=18/18 level=1 kills=1 stairs=(19,27) pathToStairs=31 adjacentEnemies=0 visibleEnemies=0 awake=0 items=3 potions=1 rooms=7 walkable=341 | You push the old door open. / Your firebolt sears the Giant Rat for 14! / The Giant Rat is slain! / You pick up 10 gold.
+    TIMEOUT seed=3237998088 Mage: floor=2 hero=(9,13) hp=30/30 level=3 kills=9 stairs=(9,4) pathToStairs=9 adjacentEnemies=0 visibleEnemies=0 awake=0 items=3 potions=4 rooms=8 walkable=356 | Your firebolt sears the Goblin for 16! / The Goblin is slain! / You pick up the Healing Potion. / You push the old door open.
+    TIMEOUT seed=3237998091 Mage: floor=4 hero=(11,4) hp=36/36 level=4 kills=11 stairs=(5,4) pathToStairs=6 adjacentEnemies=0 visibleEnemies=0 awake=0 items=2 potions=7 rooms=9 walkable=442 | You push the old door open. / You pick up the Chain Mail. / You don the Chain Mail. / You pick up the Healing Potion.
+    TIMEOUT seed=3237998092 Fighter: floor=2 hero=(22,28) hp=50/50 level=3 kills=7 stairs=(32,11) pathToStairs=27 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=2 rooms=8 walkable=377 | The Goblin is slain! / Welcome to level 3! Max HP +9, fully healed. / You pick up the Healing Potion. / You push the old door open.
+    TIMEOUT seed=3237998094 Mage: floor=6 hero=(8,21) hp=48/48 level=6 kills=21 stairs=(8,35) pathToStairs=14 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=3 rooms=10 walkable=488 | You hit the Orc Brute for 12. / The Orc Brute is slain! / Welcome to level 6! Max HP +6, fully healed. / You pick up 16 gold.
+    TIMEOUT seed=3237998095 Fighter: floor=3 hero=(14,21) hp=59/59 level=4 kills=11 stairs=(28,13) pathToStairs=22 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=1 rooms=8 walkable=349 | The Skeleton Archer misses you. / You hit the Skeleton Archer for 8. / The Skeleton Archer is slain! / Welcome to level 4! Max HP +9, fully healed.
+    TIMEOUT seed=3237998098 Fighter: floor=2 hero=(13,34) hp=42/50 level=3 kills=7 stairs=(8,34) pathToStairs=5 adjacentEnemies=0 visibleEnemies=0 awake=0 items=1 potions=4 rooms=8 walkable=376 | You miss the Giant Rat. / The Giant Rat hits you for 2. / You hit the Giant Rat for 3. / The Giant Rat is slain!
+    TIMEOUT seed=3237998099 Rogue: floor=4 hero=(28,10) hp=21/28 level=2 kills=6 stairs=(26,31) pathToStairs=37 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=4 rooms=9 walkable=483 | You pick up 28 gold. / You melt into shadow. Your next strike will be lethal. / You descend to floor 4 of the Emberdeep. / You push the old door open.
+    TIMEOUT seed=3237998100 Mage: floor=2 hero=(22,11) hp=24/24 level=2 kills=5 stairs=(28,11) pathToStairs=6 adjacentEnemies=0 visibleEnemies=0 awake=0 items=5 potions=2 rooms=8 walkable=420 | Your firebolt sears the Giant Rat for 10! / The Giant Rat is slain! / You pick up the Scroll of Blinking. / You pick up 7 gold.
     ==============================================================
         at org.junit.Assert.fail(Assert.java:89)
         at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
-        at com.emberdeep.game.sim.SimulationTest.the dungeon can be beaten and every run terminates(SimulationTest.kt:55)
-
-CombatTest > armour class reduces the hit rate PASSED
-
-CombatTest > a better weapon and higher level deal more damage PASSED
-
-CombatTest > monster attacks respect the hero's armour PASSED
-
-CombatTest > natural 20 hits even against an impossible armour class PASSED
-
-CombatTest > player attacks always deal at least one damage when they land PASSED
-
-FovTest > computing outside the map is harmless PASSED
 ```

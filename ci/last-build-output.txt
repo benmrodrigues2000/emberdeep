@@ -30,11 +30,11 @@ Daemon will be stopped at the end of the build
 > Task :app:mergeDebugGlobalSynthetics FROM-CACHE
 > Task :app:processDebugJavaRes UP-TO-DATE
 > Task :app:mergeDebugStartupProfile
-> Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugJniLibFolders
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugNativeLibs NO-SOURCE
 > Task :app:mergeExtDexDebug FROM-CACHE
 > Task :app:mergeLibDexDebug FROM-CACHE
-> Task :app:mergeDebugNativeLibs NO-SOURCE
 > Task :app:stripDebugDebugSymbols NO-SOURCE
 > Task :app:mergeDebugJavaResource
 > Task :app:mergeProjectDexDebug
@@ -60,14 +60,13 @@ Daemon will be stopped at the end of the build
 > Task :app:mergeReleaseNativeLibs NO-SOURCE
 > Task :app:stripReleaseDebugSymbols NO-SOURCE
 > Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
 > Task :app:packageDebug
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
-> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
 > Task :app:checkReleaseDuplicateClasses
-> Task :app:mergeReleaseArtProfile
-> Task :app:processReleaseManifestForPackage
 > Task :app:mergeReleaseStartupProfile
+> Task :app:mergeReleaseArtProfile
 > Task :app:mergeReleaseShaders
 > Task :app:compileReleaseShaders NO-SOURCE
 > Task :app:generateReleaseAssets UP-TO-DATE
@@ -76,7 +75,6 @@ Daemon will be stopped at the end of the build
 > Task :app:extractReleaseVersionControlInfo
 > Task :app:processApplicationManifestReleaseForBundle
 > Task :app:collectReleaseDependencies
-> Task :app:processReleaseResources
 > Task :app:sdkReleaseDependencyData
 > Task :app:validateSigningRelease
 > Task :app:writeReleaseAppMetadata
@@ -84,6 +82,8 @@ Daemon will be stopped at the end of the build
 > Task :app:generateReleaseFeatureMetadata FROM-CACHE
 > Task :app:configureReleaseDependencies
 > Task :app:parseReleaseIntegrityConfig FROM-CACHE
+> Task :app:processReleaseManifestForPackage
+> Task :app:processReleaseResources
 > Task :app:bundleReleaseResources
 
 > Task :app:compileReleaseKotlin
@@ -98,11 +98,11 @@ w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdee
 > Task :app:minifyReleaseWithR8
 > Task :app:compileReleaseArtProfile
 > Task :app:buildReleasePreBundle
-> Task :app:packageReleaseBundle
 > Task :app:shrinkReleaseRes
+> Task :app:packageReleaseBundle
 > Task :app:optimizeReleaseResources
-> Task :app:shrinkBundleReleaseResources
 > Task :app:packageRelease
+> Task :app:shrinkBundleReleaseResources
 > Task :app:createReleaseApkListingFileRedirect
 > Task :app:signReleaseBundle
 > Task :app:produceReleaseBundleIdeListingFile
@@ -112,7 +112,7 @@ w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdee
 > Task :app:lintVitalReportRelease
 > Task :app:lintVitalRelease
 > Task :app:assembleRelease
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1791304908916.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1791305124749.json
 
-BUILD SUCCESSFUL in 50s
+BUILD SUCCESSFUL in 1m 3s
 90 actionable tasks: 59 executed, 15 from cache, 16 up-to-date
