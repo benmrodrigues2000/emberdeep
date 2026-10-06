@@ -15,29 +15,178 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:javaPreCompileDebug FROM-CACHE
-> Task :app:processDebugManifestForPackage
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:processDebugManifestForPackage
 > Task :app:processDebugResources
 
-> Task :app:compileDebugKotlin FAILED
-e: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdeep/game/core/GameApp.kt:30:29 None of the following functions can be called with the arguments supplied: 
-public constructor File(p0: URI!) defined in java.io.File
-public constructor File(p0: String!) defined in java.io.File
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791304438498.json
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdeep/game/core/GameApp.kt:36:42 'VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java
+
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:processDebugJavaRes
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+
+> Task :app:testDebugUnitTest
+
+CodecTest > matches the RFC 4648 reference vectors PASSED
+
+CodecTest > decodes the reference vectors PASSED
+
+CodecTest > rejects malformed input instead of throwing PASSED
+
+CodecTest > round trips every length up to 300 bytes PASSED
+
+RngTest > pick only returns elements of the list PASSED
+
+RngTest > state can be saved and resumed PASSED
+
+RngTest > range and dice respect their bounds PASSED
+
+RngTest > chance is calibrated PASSED
+
+RngTest > different seeds diverge PASSED
+
+RngTest > same seed produces the same sequence PASSED
+
+RngTest > nextInt stays inside its bound PASSED
+
+SaveManagerTest > unreadable saves are discarded instead of crashing PASSED
+
+SaveManagerTest > saving leaves no temporary file behind PASSED
+
+SaveManagerTest > a corrupt save falls back to the previous good one PASSED
+
+SaveManagerTest > asynchronous autosaves reach the disk once flushed PASSED
+
+SaveManagerTest > the profile round trips and drops unknown unlocks PASSED
+
+SaveManagerTest > a corrupt profile falls back to defaults PASSED
+
+SaveManagerTest > resetAll erases progression but keeps a working manager PASSED
+
+SaveManagerTest > a run survives a save and load cycle intact PASSED
+
+SaveManagerTest > missing files are simply empty PASSED
+
+DungeonGeneratorTest > generation is deterministic for a given seed PASSED
+
+DungeonGeneratorTest > monsters always match the floor they spawn on PASSED
+
+DungeonGeneratorTest > every floor of the dungeon is fully connected and populated PASSED
+
+DungeonGeneratorTest > deeper floors scale up PASSED
+
+DungeonGeneratorTest > the final floor is a hand built arena with exactly one dragon PASSED
+
+PlayerTest > a huge xp payout levels several times without losing the remainder PASSED
+
+PlayerTest > gear and buffs feed the derived stats PASSED
+
+PlayerTest > levelling up costs more each level and fully heals PASSED
+
+PlayerTest > unlocks follow the treasury cost PASSED
+
+PlayerTest > the inventory holds ten slots and stacks consumables PASSED
+
+SimulationTest > a lone hero on floor one is never instantly killed PASSED
+
+SimulationTest > a levelled and geared hero can kill the dragon PASSED
+
+SimulationTest > twelve complete expeditions never break a structural invariant STANDARD_OUT
+
+    ================ EMBERDEEP BALANCE SIMULATION ================
+    runs: 12   wins: 0   deaths: 7   timeouts: 5
+    win rate: 0.0%   avg floor reached: 5.1   avg level: 4.2
+    avg kills (finished runs): 14.9   avg turns: 815.2   avg gold: 103.3
+      Fighter  runs 4   wins 0   avg floor 4.8   avg level 3.8
+      Rogue    runs 4   wins 0   avg floor 5.0   avg level 3.5
+      Mage     runs 4   wins 0   avg floor 5.5   avg level 5.2
+    deaths by floor: F3=1  F4=2  F7=2  F8=1  F10=1  
+    ==============================================================
+
+
+SimulationTest > twelve complete expeditions never break a structural invariant PASSED
+
+SimulationTest > the dungeon can be beaten and every run terminates FAILED
+    java.lang.AssertionError: seed 3237998083: run hit the turn cap
+
+    ================ EMBERDEEP BALANCE SIMULATION ================
+    runs: 21   wins: 0   deaths: 12   timeouts: 9
+    win rate: 0.0%   avg floor reached: 4.4   avg level: 3.8
+    avg kills (finished runs): 13.5   avg turns: 837.0   avg gold: 90.0
+      Fighter  runs 7   wins 0   avg floor 4.4   avg level 4.0
+      Rogue    runs 7   wins 0   avg floor 3.4   avg level 2.3
+      Mage     runs 7   wins 0   avg floor 5.4   avg level 5.0
+    deaths by floor: F2=2  F4=3  F5=1  F6=2  F7=1  F9=2  F10=1  
+    ==============================================================
+        at org.junit.Assert.fail(Assert.java:89)
+        at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
+        at com.emberdeep.game.sim.SimulationTest.the dungeon can be beaten and every run terminates(SimulationTest.kt:55)
+
+CombatTest > armour class reduces the hit rate PASSED
+
+CombatTest > a better weapon and higher level deal more damage PASSED
+
+CombatTest > monster attacks respect the hero's armour PASSED
+
+CombatTest > natural 20 hits even against an impossible armour class PASSED
+
+CombatTest > player attacks always deal at least one damage when they land FAILED
+    java.lang.AssertionError: damage roll: 16 not in [1, 14]
+        at org.junit.Assert.fail(Assert.java:89)
+        at com.emberdeep.game.testutil.A.within(A.kt:54)
+        at com.emberdeep.game.systems.CombatTest.player attacks always deal at least one damage when they land(CombatTest.kt:35)
+
+FovTest > computing outside the map is harmless PASSED
+
+FovTest > the sight radius is respected PASSED
+
+FovTest > the hero can see its own tile and the room around it PASSED
+
+FovTest > rock hides whatever lies beyond it PASSED
+
+FovTest > line of sight is blocked by walls and doors PASSED
+
+FovTest > everything visible also becomes explored PASSED
+
+PathfinderTest > unreachable and invalid targets are reported as no path PASSED
+
+PathfinderTest > searches are deterministic and allocation-free on repeat PASSED
+
+PathfinderTest > a monster blocks the player's path but not the monster's own search FAILED
+    java.lang.AssertionError: no step when blocked: expected 1 but was -1
+        at org.junit.Assert.fail(Assert.java:89)
+        at com.emberdeep.game.testutil.A.eq(A.kt:15)
+        at com.emberdeep.game.systems.PathfinderTest.a monster blocks the player's path but not the monster's own search(PathfinderTest.kt:60)
+
+PathfinderTest > every enemy in a generated dungeon can path to the hero PASSED
+
+PathfinderTest > nextStep agrees with the full path PASSED
+
+PathfinderTest > paths route around monsters when there is room PASSED
+
+PathfinderTest > finds a straight path down a corridor PASSED
+
+PathfinderTest > unexplored tiles can be excluded from the search PASSED
+
+53 tests completed, 3 failed
+
+> Task :app:testDebugUnitTest FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791304666055.json
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
-Execution failed for task ':app:compileDebugKotlin'.
-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
-   > Compilation error. See log for more details
+Execution failed for task ':app:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///home/runner/work/emberdeep/emberdeep/app/build/reports/tests/testDebugUnitTest/index.html
 
 * Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
 > Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
 
-BUILD FAILED in 35s
-17 actionable tasks: 9 executed, 8 from cache
+BUILD FAILED in 1m 4s
+23 actionable tasks: 15 executed, 8 from cache
