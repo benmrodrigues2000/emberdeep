@@ -10,7 +10,7 @@ waiting at the bottom.
 ![Platform](https://img.shields.io/badge/platform-Android%207.0%2B-green)
 ![Language](https://img.shields.io/badge/language-Kotlin-purple)
 ![Dependencies](https://img.shields.io/badge/runtime%20dependencies-zero-orange)
-![Tests](https://img.shields.io/badge/tests-9%20suites%20%2B%20balance%20simulation-blue)
+![Tests](https://img.shields.io/badge/tests-10%20suites%20%2B%20balance%20simulation-blue)
 
 ## Features
 
@@ -49,7 +49,7 @@ waiting at the bottom.
 | Version | 1.1.0 (versionCode 2) |
 
 The custom engine was chosen over LibGDX/Godot deliberately: a turn-based 2D
-tile game needs no heavy framework, and this keeps the APK tiny (~1.4 MB),
+tile game needs no heavy framework, and this keeps the build tiny (~1.0 MB debug, ~200 KB release),
 the build trivially stable, and performance excellent on mid-range phones.
 The full rationale and every system specification live in
 [`docs/DESIGN.md`](docs/DESIGN.md).
@@ -98,9 +98,11 @@ environment variables) so CI can produce installable signed builds.
 The gameplay layer (`model`, `gen`, `systems`, `data`) contains no Android
 imports, so the entire game can be played headlessly in unit tests:
 
-- **9 JVM test suites** cover the codec, RNG determinism, d20 combat maths,
+- **10 JVM test suites** cover the codec, RNG determinism, d20 combat maths,
   field of view, pathfinding, dungeon connectivity across 6 seeds × 10 floors,
-  progression, and the save system (including corrupt-save recovery).
+  progression, the turn engine (movement, abilities, potions, pack limits,
+  stairs, death, scrolls) and the save system (including corrupt-save
+  recovery).
 - **`SimulationTest`** drives the real `TurnEngine` through complete
   expeditions with a scripted bot and checks structural invariants after
   *every turn* — hero on walkable ground, HP bounds, no two monsters sharing a
@@ -131,7 +133,7 @@ app/src/main/kotlin/com/emberdeep/game/
                              #   game over, victory
 
 app/src/test/kotlin/com/emberdeep/game/
-├── core/  systems/  model/  gen/  data/   # 9 unit test suites
+├── core/  systems/  model/  gen/  data/   # 10 unit test suites
 └── sim/                     # headless player bot + balance simulation
 
 docs/DESIGN.md               # full internal development specification
