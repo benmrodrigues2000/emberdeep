@@ -1,6 +1,7 @@
 package com.emberdeep.game.sim
 
 import com.emberdeep.game.core.Rng
+import com.emberdeep.game.gen.DungeonGenerator
 import com.emberdeep.game.model.ClassType
 import com.emberdeep.game.model.DungeonMap
 import com.emberdeep.game.model.GameState
@@ -187,6 +188,16 @@ object BalanceReport {
                     group.count { it.victory }
                 }   avg floor ${avg(group.map { it.floorReached })}   avg level ${
                     avg(group.map { it.level })
+                }"
+            )
+        }
+        val bossArrivals = results.filter { it.floorReached >= DungeonGenerator.FINAL_FLOOR }
+        if (bossArrivals.isNotEmpty()) {
+            sb.appendLine(
+                "  reached the dragon: ${bossArrivals.size} runs, wins ${
+                    bossArrivals.count { it.victory }
+                }, avg level ${avg(bossArrivals.map { it.level })}, avg gold ${
+                    avg(bossArrivals.map { it.gold })
                 }"
             )
         }

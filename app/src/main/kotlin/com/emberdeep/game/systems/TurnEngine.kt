@@ -347,7 +347,11 @@ class TurnEngine(
             events.onVictory()
             return
         }
-        if (state.rng.chance(0.35f) && map.itemAt(enemy.x, enemy.y) == null) {
+        // Wall-phasing monsters can be killed inside solid rock: never leave
+        // treasure there, it would be unreachable for the rest of the floor.
+        if (state.rng.chance(0.35f) && map.isWalkable(enemy.x, enemy.y) &&
+            map.itemAt(enemy.x, enemy.y) == null
+        ) {
             map.groundItems.add(
                 com.emberdeep.game.model.GroundItem(
                     enemy.x, enemy.y, Item(ItemType.GOLD_PILE),
