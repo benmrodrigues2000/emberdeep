@@ -1,0 +1,14 @@
+# Gradle
+.gradle/
+build/
+app/build/
+
+# IDE
+.idea/
+*.iml
+local.properties
+.DS_Store
+
+# NOTE: keystore/emberdeep-release.jks is intentionally committed so CI can
+# produce signed builds. Replace it with your own private keystore before
+# publishing to Google Play (see README).
