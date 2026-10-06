@@ -62,11 +62,11 @@ class Enemy(val type: EnemyType, x: Int, y: Int) : GridEntity() {
     /** Scale stats with dungeon depth so early monsters stay relevant. */
     fun scaleToFloor(floor: Int) {
         val over = (floor - type.minFloor).coerceAtLeast(0)
-        maxHp = type.hp + over * 2
+        maxHp = type.hp + over
         hp = maxHp
-        atk = type.atk + over / 2
-        dmgB = type.dmgB + over / 3
-        xp = type.xp + over * 2
+        atk = type.atk + over / 3
+        dmgB = type.dmgB + over / 4
+        xp = type.xp + over * 3
     }
 
     fun toJson(): JSONObject = JSONObject().apply {
@@ -114,7 +114,7 @@ class Player(val classType: ClassType) : GridEntity() {
     var autoCrit = false
     var levelUpsPending = 0   // used for a brief HUD flash
 
-    val xpToNext: Int get() = 25 + (level - 1) * 30
+    val xpToNext: Int get() = 20 + (level - 1) * 25
 
     val atkBonus: Int
         get() = classType.baseAtk + (level - 1) / 2 +
@@ -126,7 +126,7 @@ class Player(val classType: ClassType) : GridEntity() {
 
     val dmgN: Int get() = weapon?.dmgN ?: classType.dmgN
     val dmgS: Int get() = weapon?.dmgS ?: classType.dmgS
-    val dmgB: Int get() = (weapon?.dmgB ?: classType.dmgB) + (level - 1) / 3
+    val dmgB: Int get() = (weapon?.dmgB ?: classType.dmgB) + (level - 1) / 2
 
     val damageLabel: String
         get() {
@@ -161,9 +161,9 @@ class Player(val classType: ClassType) : GridEntity() {
             level++
             val gained = classType.hitDie + 2
             maxHp += gained
-            hp = (hp + maxHp / 2).coerceAtMost(maxHp)
+            hp = maxHp  // level-ups fully restore you — a classic earned reprieve
             levelUpsPending++
-            msgs.add("Welcome to level $level! Max HP +$gained.")
+            msgs.add("Welcome to level $level! Max HP +$gained, fully healed.")
         }
         return msgs
     }

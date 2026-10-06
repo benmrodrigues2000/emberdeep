@@ -23,7 +23,9 @@ enum class Spr {
  */
 class Sprites {
 
-    private val cache = HashMap<Long, Bitmap>()
+    // Concurrent: cleared from the UI thread on resize while the game thread
+    // reads it. Worst case a sprite is rendered twice — never corruption.
+    private val cache = java.util.concurrent.ConcurrentHashMap<Long, Bitmap>()
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG)
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
     private val path = Path()

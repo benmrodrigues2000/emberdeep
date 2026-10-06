@@ -492,7 +492,7 @@ class TurnEngine(
             events.onMissEffect(player.x, player.y)
             return
         }
-        if (e.type.special == EnemySpecial.BURNER && state.rng.chance(0.4f)) {
+        if (e.type.special == EnemySpecial.BURNER && state.rng.chance(0.3f)) {
             player.burnTurns = (player.burnTurns + 2).coerceAtMost(4)
             log("Embers cling to you — you are burning!", Palette.EMBER)
         }
@@ -505,10 +505,9 @@ class TurnEngine(
         } else {
             "The ${e.type.display} $verb you for ${r.dmg}."
         }
-        damagePlayer(0, null, heavy = r.crit) // effects only; hp already reduced
         log(msg, if (r.crit) Palette.BAD else Palette.HP)
         events.onFloatText(player.x, player.y, "${r.dmg}", Palette.BAD, big = r.crit)
-        checkPlayerDeath()
+        damagePlayer(0, null, heavy = r.crit) // effects + death check; hp already reduced
     }
 
     private fun moveEnemyTowardPlayer(e: Enemy) {

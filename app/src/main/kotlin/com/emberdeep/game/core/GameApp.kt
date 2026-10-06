@@ -141,7 +141,10 @@ class GameApp(val context: Context) {
     /** Called from the activity lifecycle. */
     fun onAppPause() {
         audio.onPause()
-        topScreen()?.let { if (it is PausableScreen) it.onAppPause() }
+        // Save every pausable screen in the stack — the game screen may sit
+        // beneath an inventory or pause overlay when the app is backgrounded.
+        val snapshot: List<Screen> = synchronized(screens) { ArrayList(screens) }
+        for (sc in snapshot) if (sc is PausableScreen) sc.onAppPause()
         saveProfile()
     }
 

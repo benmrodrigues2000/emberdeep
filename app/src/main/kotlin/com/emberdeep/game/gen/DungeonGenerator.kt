@@ -185,7 +185,7 @@ object DungeonGenerator {
         val pool = EnemyType.poolFor(floor)
         if (pool.isEmpty()) return enemies
         val totalWeight = pool.sumOf { it.weight }
-        val count = 4 + floor + rng.nextInt(3)
+        val count = 4 + (floor * 2) / 3 + rng.nextInt(3)
 
         var attempts = 0
         while (enemies.size < count && attempts < 300) {
@@ -228,19 +228,25 @@ object DungeonGenerator {
             if (enemies.any { it.x == ix && it.y == iy }) continue
 
             when (rng.nextInt(10)) {
-                in 0..3 -> dropGold(map, ix, iy, 5 + floor * 3 + rng.nextInt(10 + floor * 2))
-                in 4..6 -> dropAt(map, ix, iy, Item(rollConsumable(rng, floor)))
+                in 0..2 -> dropGold(map, ix, iy, 5 + floor * 3 + rng.nextInt(10 + floor * 2))
+                in 3..6 -> dropAt(map, ix, iy, Item(rollConsumable(rng, floor)))
                 7, 8 -> dropAt(map, ix, iy, Item(rollGear(rng, floor, ItemKind.WEAPON)))
                 else -> dropAt(map, ix, iy, Item(rollGear(rng, floor, ItemKind.ARMOR)))
             }
             placed++
         }
-        // Guarantee one healing potion per floor so runs stay fair.
-        val room = map.rooms[map.rooms.size / 2]
-        if (map.isWalkable(room.cx, room.cy) && map.itemAt(room.cx, room.cy) == null &&
-            !(room.cx == map.stairsX && room.cy == map.stairsY)
-        ) {
-            dropAt(map, room.cx, room.cy, Item(ItemType.POTION_HEAL))
+        // Guarantee healing per floor so runs stay fair (two from floor 3).
+        val healSpots = if (floor >= 3) 2 else 1
+        for (i in 0 until healSpots) {
+            val room = map.rooms[(map.rooms.size * (i + 1)) / (healSpots + 1)]
+            val hx = room.cx + i
+            if (map.isWalkable(hx, room.cy) && map.itemAt(hx, room.cy) == null &&
+                !(hx == map.stairsX && room.cy == map.stairsY)
+            ) {
+                val potion = if (floor >= 5 && i == 0) ItemType.POTION_GREATER_HEAL
+                else ItemType.POTION_HEAL
+                dropAt(map, hx, room.cy, Item(potion))
+            }
         }
     }
 

@@ -42,10 +42,10 @@ enum class ItemType(
         acBonus = 4, tier = 4, minFloor = 7, color = 0xFFFF9A5D.toInt()),
 
     // Potions ---------------------------------------------------------------
-    POTION_HEAL(ItemKind.POTION, "Healing Potion", "Restores 12 HP.",
-        power = 12, color = 0xFFE0443C.toInt()),
-    POTION_GREATER_HEAL(ItemKind.POTION, "Greater Healing", "Restores 30 HP.",
-        power = 30, minFloor = 4, color = 0xFFFF7A6B.toInt()),
+    POTION_HEAL(ItemKind.POTION, "Healing Potion", "Restores 16 HP.",
+        power = 16, color = 0xFFE0443C.toInt()),
+    POTION_GREATER_HEAL(ItemKind.POTION, "Greater Healing", "Restores 40 HP.",
+        power = 40, minFloor = 4, color = 0xFFFF7A6B.toInt()),
     POTION_STRENGTH(ItemKind.POTION, "Potion of Might", "+3 attack for 25 turns.",
         power = 25, color = 0xFFFFA14D.toInt()),
     POTION_SHIELD(ItemKind.POTION, "Stoneskin Potion", "+4 AC for 25 turns.",

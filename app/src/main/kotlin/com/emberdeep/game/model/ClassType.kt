@@ -20,10 +20,10 @@ enum class ClassType(
     FIGHTER(
         "Fighter",
         "A wall of steel. High health and heavy armor.",
-        30, 6, 3, 14, 1, 8, 1,
+        32, 7, 4, 14, 1, 8, 1,
         "Whirlwind",
         "Strike every adjacent enemy with a bonus +4 damage.",
-        6, 0, 0xFFB7C3D0.toInt()
+        5, 0, 0xFFB7C3D0.toInt()
     ),
     ROGUE(
         "Rogue",
