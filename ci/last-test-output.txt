@@ -16,14 +16,14 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugManifest
 > Task :app:javaPreCompileDebug FROM-CACHE
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
 > Task :app:processDebugManifestForPackage
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
 > Task :app:processDebugResources
 > Task :app:compileDebugKotlin
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar
 > Task :app:processDebugJavaRes
 > Task :app:bundleDebugClassesToRuntimeJar
-> Task :app:bundleDebugClassesToCompileJar
 
 > Task :app:compileDebugUnitTestKotlin
 w: file:///home/runner/work/emberdeep/emberdeep/app/src/test/kotlin/com/emberdeep/game/sim/Bot.kt:185:13 Variable 'p' is never used
@@ -174,7 +174,7 @@ TurnEngineTest > the dead can no longer act PASSED
 TurnEngineTest > attacking a wall-phasing monster inside rock leaves no unreachable loot PASSED
 
 TurnEngineTest > walking into rock is refused and costs no turn PASSED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791307650362.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791307903441.json
 
-BUILD SUCCESSFUL in 52s
+BUILD SUCCESSFUL in 42s
 23 actionable tasks: 15 executed, 8 from cache
