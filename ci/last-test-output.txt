@@ -28,22 +28,160 @@ w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdee
 > Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:processDebugJavaRes
 
-> Task :app:compileDebugUnitTestKotlin FAILED
-e: file:///home/runner/work/emberdeep/emberdeep/app/src/test/kotlin/com/emberdeep/game/systems/TurnEngineTest.kt:50:13 Unresolved reference: dmgN
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791305778531.json
+> Task :app:compileDebugUnitTestKotlin
+w: file:///home/runner/work/emberdeep/emberdeep/app/src/test/kotlin/com/emberdeep/game/sim/Bot.kt:185:13 Variable 'p' is never used
 
-FAILURE: Build failed with an exception.
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
 
-* What went wrong:
-Execution failed for task ':app:compileDebugUnitTestKotlin'.
-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
-   > Compilation error. See log for more details
+> Task :app:testDebugUnitTest
 
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
+CodecTest > matches the RFC 4648 reference vectors PASSED
 
-BUILD FAILED in 47s
-21 actionable tasks: 13 executed, 8 from cache
+CodecTest > decodes the reference vectors PASSED
+
+CodecTest > rejects malformed input instead of throwing PASSED
+
+CodecTest > round trips every length up to 300 bytes PASSED
+
+RngTest > pick only returns elements of the list PASSED
+
+RngTest > state can be saved and resumed PASSED
+
+RngTest > range and dice respect their bounds PASSED
+
+RngTest > chance is calibrated PASSED
+
+RngTest > different seeds diverge PASSED
+
+RngTest > same seed produces the same sequence PASSED
+
+RngTest > nextInt stays inside its bound PASSED
+
+SaveManagerTest > unreadable saves are discarded instead of crashing PASSED
+
+SaveManagerTest > saving leaves no temporary file behind PASSED
+
+SaveManagerTest > a corrupt save falls back to the previous good one PASSED
+
+SaveManagerTest > asynchronous autosaves reach the disk once flushed PASSED
+
+SaveManagerTest > the profile round trips and drops unknown unlocks PASSED
+
+SaveManagerTest > a corrupt profile falls back to defaults PASSED
+
+SaveManagerTest > resetAll erases progression but keeps a working manager PASSED
+
+SaveManagerTest > a run survives a save and load cycle intact PASSED
+
+SaveManagerTest > missing files are simply empty PASSED
+
+DungeonGeneratorTest > generation is deterministic for a given seed PASSED
+
+DungeonGeneratorTest > monsters always match the floor they spawn on PASSED
+
+DungeonGeneratorTest > every floor of the dungeon is fully connected and populated PASSED
+
+DungeonGeneratorTest > deeper floors scale up PASSED
+
+DungeonGeneratorTest > the final floor is a hand built arena with exactly one dragon PASSED
+
+PlayerTest > a huge xp payout levels several times without losing the remainder PASSED
+
+PlayerTest > gear and buffs feed the derived stats PASSED
+
+PlayerTest > levelling up costs more each level and fully heals PASSED
+
+PlayerTest > unlocks follow the treasury cost PASSED
+
+PlayerTest > the inventory holds ten slots and stacks consumables PASSED
+
+SimulationTest > a lone hero on floor one is never instantly killed PASSED
+
+SimulationTest > a levelled and geared hero can kill the dragon STANDARD_OUT
+    EMBERDEEP ENDGAME: turns=63 swings=21 hits=13 misses=45 heals=7 hero=20/95 dragon=-7 bossDefeated=true
+    EMBERDEEP ENDGAME LOG: You miss the The Ember Dragon. | The flames sear you for 2! | The The Ember Dragon misses you. | The Ember Cultist misses you. | You miss the The Ember Dragon. | The flames sear you for 2! | The The Ember Dragon misses you. | The Ember Cultist shoots you for 4. | You hit the The Ember Dragon for 12. | The The Ember Dragon is slain!
+
+SimulationTest > a levelled and geared hero can kill the dragon PASSED
+
+SimulationTest > twelve complete expeditions never break a structural invariant STANDARD_OUT
+
+    ================ EMBERDEEP BALANCE SIMULATION ================
+    runs: 12   wins: 1   deaths: 11   timeouts: 0
+    win rate: 8.3%   avg floor reached: 7.8   avg level: 5.8
+    avg kills (finished runs): 19.8   avg turns: 511.1   avg gold: 212.7
+      Fighter  runs 4   wins 0   avg floor 7.0   avg level 5.5
+      Rogue    runs 4   wins 0   avg floor 6.2   avg level 3.8
+      Mage     runs 4   wins 1   avg floor 10.0   avg level 8.2
+      reached the dragon: 6 runs, wins 1, avg level 8.0, avg gold 318.5
+    deaths by floor: F2=1  F3=1  F5=1  F7=2  F9=1  F10=5  
+    ==============================================================
+
+
+SimulationTest > twelve complete expeditions never break a structural invariant PASSED
+
+SimulationTest > the dungeon can be beaten and every run terminates PASSED
+
+CombatTest > armour class reduces the hit rate PASSED
+
+CombatTest > a better weapon and higher level deal more damage PASSED
+
+CombatTest > monster attacks respect the hero's armour PASSED
+
+CombatTest > natural 20 hits even against an impossible armour class PASSED
+
+CombatTest > player attacks always deal at least one damage when they land PASSED
+
+FovTest > computing outside the map is harmless PASSED
+
+FovTest > the sight radius is respected PASSED
+
+FovTest > the hero can see its own tile and the room around it PASSED
+
+FovTest > rock hides whatever lies beyond it PASSED
+
+FovTest > line of sight is blocked by walls and doors PASSED
+
+FovTest > everything visible also becomes explored PASSED
+
+PathfinderTest > unreachable and invalid targets are reported as no path PASSED
+
+PathfinderTest > searches are deterministic and allocation-free on repeat PASSED
+
+PathfinderTest > A star agrees with a flood fill across a whole late floor PASSED
+
+PathfinderTest > a monster blocks the player's path but not the monster's own search PASSED
+
+PathfinderTest > every enemy in a generated dungeon can path to the hero PASSED
+
+PathfinderTest > nextStep agrees with the full path PASSED
+
+PathfinderTest > paths route around monsters when there is room PASSED
+
+PathfinderTest > finds a straight path down a corridor PASSED
+
+PathfinderTest > unexplored tiles can be excluded from the search PASSED
+
+TurnEngineTest > picking up treasure respects the pack limit and stays on the floor PASSED
+
+TurnEngineTest > fireball scrolls scorch everything the hero can see PASSED
+
+TurnEngineTest > drinking a potion heals, costs a turn and respects the maximum PASSED
+
+TurnEngineTest > descending is only possible while standing on the stairs PASSED
+
+TurnEngineTest > levelling up in a fight tops the hero back up PASSED
+
+TurnEngineTest > killing a monster on open floor still drops loot eventually PASSED
+
+TurnEngineTest > a class ability costs its full cooldown PASSED
+
+TurnEngineTest > the dead can no longer act PASSED
+
+TurnEngineTest > attacking a wall-phasing monster inside rock leaves no unreachable loot PASSED
+
+TurnEngineTest > walking into rock is refused and costs no turn PASSED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791306009324.json
+
+BUILD SUCCESSFUL in 48s
+23 actionable tasks: 15 executed, 8 from cache

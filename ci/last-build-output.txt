@@ -31,13 +31,14 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugJavaRes UP-TO-DATE
 > Task :app:mergeDebugStartupProfile
 > Task :app:mergeDebugJniLibFolders
-> Task :app:mergeDebugNativeLibs NO-SOURCE
-> Task :app:stripDebugDebugSymbols NO-SOURCE
 > Task :app:checkDebugDuplicateClasses
-> Task :app:mergeDebugJavaResource
-> Task :app:validateSigningDebug
+> Task :app:mergeDebugNativeLibs NO-SOURCE
 > Task :app:mergeExtDexDebug FROM-CACHE
 > Task :app:mergeLibDexDebug FROM-CACHE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:mergeDebugJavaResource
+> Task :app:mergeProjectDexDebug
+> Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
 > Task :app:buildKotlinToolingMetadata
@@ -49,10 +50,12 @@ Daemon will be stopped at the end of the build
 > Task :app:mergeReleaseResources FROM-CACHE
 > Task :app:packageReleaseResources FROM-CACHE
 > Task :app:parseReleaseLocalResources FROM-CACHE
-> Task :app:mergeProjectDexDebug
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
 > Task :app:processReleaseMainManifest
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
 > Task :app:processReleaseManifest
 > Task :app:javaPreCompileRelease FROM-CACHE
 > Task :app:extractProguardFiles
@@ -65,6 +68,7 @@ Daemon will be stopped at the end of the build
 > Task :app:mergeReleaseArtProfile
 > Task :app:mergeReleaseStartupProfile
 > Task :app:mergeReleaseShaders
+> Task :app:processReleaseManifestForPackage
 > Task :app:compileReleaseShaders NO-SOURCE
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
@@ -72,18 +76,14 @@ Daemon will be stopped at the end of the build
 > Task :app:extractReleaseVersionControlInfo
 > Task :app:processApplicationManifestReleaseForBundle
 > Task :app:collectReleaseDependencies
+> Task :app:processReleaseResources
 > Task :app:sdkReleaseDependencyData
 > Task :app:validateSigningRelease
 > Task :app:writeReleaseAppMetadata
-> Task :app:processReleaseManifestForPackage
 > Task :app:writeReleaseSigningConfigVersions
-> Task :app:packageDebug
-> Task :app:createDebugApkListingFileRedirect
-> Task :app:assembleDebug
 > Task :app:generateReleaseFeatureMetadata FROM-CACHE
 > Task :app:configureReleaseDependencies
 > Task :app:parseReleaseIntegrityConfig FROM-CACHE
-> Task :app:processReleaseResources
 > Task :app:bundleReleaseResources
 
 > Task :app:compileReleaseKotlin
@@ -98,8 +98,8 @@ w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdee
 > Task :app:minifyReleaseWithR8
 > Task :app:compileReleaseArtProfile
 > Task :app:buildReleasePreBundle
-> Task :app:packageReleaseBundle
 > Task :app:shrinkReleaseRes
+> Task :app:packageReleaseBundle
 > Task :app:optimizeReleaseResources
 > Task :app:packageRelease
 > Task :app:createReleaseApkListingFileRedirect
@@ -112,7 +112,7 @@ w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdee
 > Task :app:lintVitalReportRelease
 > Task :app:lintVitalRelease
 > Task :app:assembleRelease
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1791305825960.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1791306053460.json
 
-BUILD SUCCESSFUL in 1m 2s
+BUILD SUCCESSFUL in 49s
 90 actionable tasks: 59 executed, 15 from cache, 16 up-to-date
