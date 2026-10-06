@@ -10,6 +10,7 @@ waiting at the bottom.
 ![Platform](https://img.shields.io/badge/platform-Android%207.0%2B-green)
 ![Language](https://img.shields.io/badge/language-Kotlin-purple)
 ![Dependencies](https://img.shields.io/badge/runtime%20dependencies-zero-orange)
+![Tests](https://img.shields.io/badge/tests-10%20suites%20%2B%20balance%20simulation-blue)
 
 ## Features
 
@@ -20,8 +21,9 @@ waiting at the bottom.
 - **9 monster types** — rats, goblins, skeletons, archers, orcs, burning
   cultists, wall-phasing wraiths, regenerating trolls… and a boss dragon with
   a fire-breath pattern
-- **Procedural dungeons** — rooms, corridors, doors, ember vents, a guaranteed
-  hand-crafted boss arena on floor 10
+- **Procedural dungeons** — rooms, corridors, doors, ember vents, and a
+  guaranteed hand-crafted boss arena on floor 10; connectivity between every
+  room, monster and treasure pile is *proven* by flood fill at generation time
 - **Loot & progression** — 5 weapon tiers, 4 armor tiers, potions, scrolls,
   XP levels, meta-progression treasury and class unlocks
 - **Roguelike systems** — field of view (recursive shadowcasting), fog of war,
@@ -31,8 +33,34 @@ waiting at the bottom.
   ships **zero** image/audio assets
 - **Mobile-first UX** — large touch targets, haptic feedback, contextual
   buttons, portrait one-handed play, pause/resume/background-safe
-- **Error-safe saves** — atomic writes, autosave every 10 turns and on
-  lifecycle events, corrupt-save recovery
+- **Error-safe saves** — atomic writes with a previous-good backup, corrupt-save
+  recovery, autosave every 10 turns, and autosaves written on a background
+  worker so saving never drops a frame
+
+## Milestones
+
+The nine-phase build plan, all delivered:
+
+| Phase | Scope | Status |
+|---|---|---|
+| 1 · Foundation | Gradle project, `SurfaceView` game loop, screen stack, sprite & audio synthesis, save manager | done |
+| 2 · Core gameplay | turn engine, d20 combat, shadowcasting FOV, A* tap-to-move, items, level-ups | done |
+| 3 · Content | 10 floors, 9 monsters + dragon boss, 3 classes, 5 weapons, 4 armours, potions, scrolls | done |
+| 4 · UI/UX | menu, class select, HUD, minimap, inventory, pause, settings, help, game over, victory | done |
+| 5 · Polish | screen shake, particles, floating combat text, difficulty curve, retry loop, haptics | done |
+| 6 · Data | run + profile saves, treasury, atomic writes, previous-good backup, background autosave | done |
+| 7 · Android | manifest, lifecycle pause/resume, immersive mode, back handling, signing config | done |
+| 8 · Testing | 10 JVM suites, structural invariants, headless balance simulation | done |
+| 9 · Release | R8-minified signed APK + AAB, CI that builds and publishes them on every push | done |
+
+### Known limitations
+
+- Audio and sprite output are synthesised in code and reviewed there; they have
+  not been heard or seen on a physical device — this environment has no
+  emulator or Android SDK to run the APK on.
+- The balance numbers come from the scripted bot, not from human playtesting;
+  the win rate it reports (roughly 1 run in 12 at seed 0xE1DE0000…) is a
+  difficulty indicator, not a player-facing statistic.
 
 ## Tech
 
@@ -43,18 +71,22 @@ waiting at the bottom.
 | Min / Target SDK | 24 (Android 7.0) / 34 (Android 14) |
 | Runtime dependencies | Kotlin stdlib only |
 | Release build | R8 minified + resource-shrunk, signed |
+| Version | 1.1.0 (versionCode 2) |
 
 The custom engine was chosen over LibGDX/Godot deliberately: a turn-based 2D
-tile game needs no heavy framework, and this keeps the APK tiny (~1.5 MB),
-the build trivially stable, and performance excellent on mid-range phones
-(fixed-pool particles, cached procedural bitmaps, zero allocations in the
-render loop, clamped delta-time so logic is never frame-rate dependent).
+tile game needs no heavy framework, and this keeps the build tiny (~1.0 MB debug, ~200 KB release),
+the build trivially stable, and performance excellent on mid-range phones.
+The full rationale and every system specification live in
+[`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Building
 
 Prerequisites: JDK 17 and the Android SDK (or just Android Studio).
 
 ```bash
+# Unit tests, invariant fuzzing and the balance simulation
+./gradlew :app:testDebugUnitTest
+
 # Debug APK
 ./gradlew :app:assembleDebug
 # -> app/build/outputs/apk/debug/app-debug.apk
@@ -70,9 +102,13 @@ Prerequisites: JDK 17 and the Android SDK (or just Android Studio).
 
 Or open the project in Android Studio and press Run.
 
-Continuous integration (`.github/workflows/android.yml`) builds all three
-outputs on every push and commits them to [`dist/`](dist/), so you can grab a
-ready-to-install `Emberdeep-debug.apk` straight from the repo.
+Continuous integration (`.github/workflows/android.yml`) runs the test suite
+and the balance simulation, builds all three outputs on every push, and commits
+them to [`dist/`](dist/) so you can grab a ready-to-install
+`Emberdeep-debug.apk` straight from the repo. Because runner log storage is not
+reachable from every environment, each run also publishes its own report —
+test results, compiler errors and the balance numbers — to
+[`ci/last-test-run.md`](ci/last-test-run.md).
 
 ### Signing
 
@@ -82,6 +118,27 @@ A demo release keystore is committed at `keystore/emberdeep-release.jks`
 environment variables) so CI can produce installable signed builds.
 **Before publishing to Google Play, replace it with your own private keystore.**
 
+## Verification
+
+The gameplay layer (`model`, `gen`, `systems`, `data`) contains no Android
+imports, so the entire game can be played headlessly in unit tests:
+
+- **10 JVM test suites** cover the codec, RNG determinism, d20 combat maths,
+  field of view, pathfinding, dungeon connectivity across 6 seeds × 10 floors,
+  progression, the turn engine (movement, abilities, potions, pack limits,
+  stairs, death, scrolls) and the save system (including corrupt-save
+  recovery).
+- **`SimulationTest`** drives the real `TurnEngine` through complete
+  expeditions with a scripted bot and checks structural invariants after
+  *every turn* — hero on walkable ground, HP bounds, no two monsters sharing a
+  tile, no dead monster still listed, usable stairs, finite positions.
+- **Balance report** — win rate, floor-by-floor death histogram, levels, kills
+  and turn counts, printed by the suite and published by CI. It also proves the
+  dungeon is beatable and that a levelled, geared hero can kill the dragon.
+
+Any failing test prints the exact seed, so every reported problem replays
+deterministically.
+
 ## Project structure
 
 ```
@@ -89,15 +146,23 @@ app/src/main/kotlin/com/emberdeep/game/
 ├── MainActivity.kt          # lifecycle, immersive mode, back handling
 ├── core/                    # engine: game loop, screens, UI kit,
 │   │                        #   procedural sprites, synthesized audio,
-│   │                        #   particles, RNG, palette
+│   │                        #   particles, RNG, palette, base64 codec
 ├── model/                   # classes, items, enemies, dungeon map,
 │   │                        #   game state (+ JSON serialization)
 ├── gen/                     # procedural dungeon generator + loot tables
-├── systems/                 # turn engine, d20 combat, FOV, A* pathfinding
-├── data/                    # profile + save manager (atomic, corruption-safe)
+├── systems/                 # turn engine, d20 combat, FOV, A* pathfinding,
+│                            #   run setup
+├── data/                    # profile + save manager (atomic, backup, worker)
 └── ui/                      # menu, class select, game screen/HUD,
                              #   inventory, pause, settings, help,
                              #   game over, victory
+
+app/src/test/kotlin/com/emberdeep/game/
+├── core/  systems/  model/  gen/  data/   # 10 unit test suites
+└── sim/                     # headless player bot + balance simulation
+
+docs/DESIGN.md               # full internal development specification
+ci/last-test-run.md          # latest CI results and balance report
 ```
 
 ## How to play

@@ -17,11 +17,16 @@ class MenuScreen(app: GameApp) : Screen(app) {
     private val rng = Rng()
     private var time = 0f
 
+    /** Whether a resumable run is known to exist (re-checked when shown). */
+    private var runAvailable = false
+
     private val continueBtn = Btn("Continue Expedition") {
         val run = app.saves.loadRun()
         if (run != null) {
             app.setScreen(GameScreen(app, run))
         } else {
+            // Corrupt or unreadable save: stop offering it.
+            runAvailable = false
             refreshButtons()
         }
     }
@@ -32,6 +37,7 @@ class MenuScreen(app: GameApp) : Screen(app) {
     private val buttons = listOf(continueBtn, newBtn, helpBtn, settingsBtn)
 
     override fun onShow() {
+        runAvailable = app.saves.hasRun()
         refreshButtons()
         layout()
     }
@@ -39,7 +45,7 @@ class MenuScreen(app: GameApp) : Screen(app) {
     override fun onResize() = layout()
 
     private fun refreshButtons() {
-        continueBtn.visible = app.saves.hasRun()
+        continueBtn.visible = runAvailable
         layout()
     }
 

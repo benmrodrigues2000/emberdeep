@@ -28,32 +28,95 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # Both steps capture their real exit code into an output and always let
+      # the job continue, so a single run reports tests, build and the balance
+      # simulation together. The gate step at the end fails the job.
+      - name: Unit tests, invariant fuzzing and balance simulation
+        id: tests
+        run: |
+          ./gradlew --no-daemon :app:testDebugUnitTest 2>&1 | tee ci-test-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
       - name: Build debug APK, release APK and release AAB
-        run: ./gradlew --no-daemon :app:assembleDebug :app:assembleRelease :app:bundleRelease --stacktrace
+        id: build
+        run: |
+          ./gradlew --no-daemon :app:assembleDebug :app:assembleRelease :app:bundleRelease --stacktrace \
+            2>&1 | tee ci-build-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
       - name: Collect outputs
+        if: steps.build.outputs.exit_code == '0'
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk       dist/Emberdeep-debug.apk
-          cp app/build/outputs/apk/release/app-release.apk   dist/Emberdeep-release.apk
-          cp app/build/outputs/bundle/release/app-release.aab dist/Emberdeep-release.aab
+          cp app/build/outputs/apk/debug/app-debug.apk         dist/Emberdeep-debug.apk
+          cp app/build/outputs/apk/release/app-release.apk     dist/Emberdeep-release.apk
+          cp app/build/outputs/bundle/release/app-release.aab  dist/Emberdeep-release.aab
           ls -la dist/
 
+      # Runner log storage is not reachable from every environment, so the
+      # outcome is also published into the repository itself where it is
+      # always readable.
+      - name: Publish CI report
+        if: always()
+        run: |
+          mkdir -p ci
+          {
+            echo "# Emberdeep CI report"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| commit | \`${GITHUB_SHA}\` |"
+            echo "| branch | \`${GITHUB_REF_NAME}\` |"
+            echo "| generated | $(date -u +%Y-%m-%dT%H:%M:%SZ) |"
+            echo "| unit tests (exit ${{ steps.tests.outputs.exit_code }}) | ${{ steps.tests.outputs.exit_code == '0' && 'pass' || 'FAIL' }} |"
+            echo "| apk/aab build (exit ${{ steps.build.outputs.exit_code }}) | ${{ steps.build.outputs.exit_code == '0' && 'pass' || 'FAIL' }} |"
+            echo
+            echo "## Test failures"
+            echo
+            echo '```'
+            grep -h -A14 "<failure\|<error" app/build/test-results/testDebugUnitTest/*.xml 2>/dev/null | head -200 || true
+            echo '```'
+            echo
+            echo "## Compiler errors and failed tasks"
+            echo
+            echo '```'
+            grep -h "^e: \|^w: .*GameApp\|FAILURE\|Task .* FAILED" ci-test-output.txt ci-build-output.txt 2>/dev/null | head -60 || true
+            echo '```'
+            echo
+            echo "## Balance simulation"
+            echo
+            echo '```'
+            grep -A26 "EMBERDEEP BALANCE SIMULATION" ci-test-output.txt 2>/dev/null | head -40 || true
+            echo '```'
+          } > ci/last-test-run.md
+          tail -c 120000 ci-test-output.txt > ci/last-test-output.txt 2>/dev/null || true
+          tail -c 60000 ci-build-output.txt > ci/last-build-output.txt 2>/dev/null || true
+
       - name: Upload artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: emberdeep-builds
-          path: dist/*
+          path: |
+            dist/*
+            ci/*
 
-      - name: Commit built APK/AAB back to branch
+      - name: Commit build outputs and CI report back to branch
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f dist/
+          git add -f dist/ ci/
           if git diff --cached --quiet; then
             echo "No build output changes."
           else
-            git commit -m "ci: update built APK/AAB [skip ci]"
+            git commit -m "ci: update built APK/AAB and test report [skip ci]"
             git pull --rebase origin "${GITHUB_REF_NAME}" || true
             git push origin HEAD:"${GITHUB_REF_NAME}"
           fi
+
+      - name: Fail the job when tests or builds failed
+        if: steps.tests.outputs.exit_code != '0' || steps.build.outputs.exit_code != '0'
+        run: |
+          echo "CI failed — see ci/last-test-run.md, ci/last-test-output.txt, ci/last-build-output.txt"
+          exit 1

@@ -12,3 +12,6 @@ local.properties
 # NOTE: keystore/emberdeep-release.jks is intentionally committed so CI can
 # produce signed builds. Replace it with your own private keystore before
 # publishing to Google Play (see README).
+
+# CI generated reports (published back to the repo so failures are always readable)
+ci/

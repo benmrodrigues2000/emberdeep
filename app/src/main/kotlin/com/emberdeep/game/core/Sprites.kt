@@ -543,9 +543,8 @@ class Sprites {
     }
 
     private fun iconShadow(c: Canvas) {
+        // A crescent: the dark disc bites into the disc above.
         c.drawCircle(16f, 16f, 10f, f(Palette.TEXT))
-        c.drawCircle(20f, 13f, 8.6f, f(0x00000000) /* punched below */)
-        // Redraw: crescent via two circles using clear look — approximate with bg circle.
         c.drawCircle(20.5f, 13.5f, 8.2f, f(0xFF1A151E.toInt()))
         c.drawCircle(24f, 22f, 1.6f, f(Palette.TEXT))
         c.drawCircle(8f, 7f, 1.2f, f(Palette.TEXT))

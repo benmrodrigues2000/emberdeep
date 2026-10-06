@@ -24,9 +24,8 @@ import com.emberdeep.game.model.EnemyType
 import com.emberdeep.game.model.GameState
 import com.emberdeep.game.model.ItemKind
 import com.emberdeep.game.model.ItemType
-import com.emberdeep.game.model.Player
-import com.emberdeep.game.systems.Fov
 import com.emberdeep.game.systems.Pathfinder
+import com.emberdeep.game.systems.RunSetup
 import com.emberdeep.game.systems.TurnEngine
 import com.emberdeep.game.systems.TurnEvents
 
@@ -35,7 +34,7 @@ class GameScreen(
     private val state: GameState
 ) : Screen(app), TurnEvents, PausableScreen {
 
-    private val turnEngine = TurnEngine(state, this) { app.saves.saveRun(state) }
+    private val turnEngine = TurnEngine(state, this) { app.saves.saveRunAsync(state) }
 
     private var tile = 48f
     private var hudTop = 0f
@@ -67,6 +66,8 @@ class GameScreen(
 
     private var lightShader: RadialGradient? = null
     private var minimapBmp: Bitmap? = null
+    private var minimapCanvas: Canvas? = null
+    private val minimapPaint = Paint()
     private var minimapTimer = 0f
 
     private var downX = 0f
@@ -80,7 +81,13 @@ class GameScreen(
         playerAct { turnEngine.descend() }
     }
     private val cancelTargetBtn = Btn("Cancel") { targetMode = TARGET_NONE }
-    private val buttons get() = listOf(abilityBtn, waitBtn, bagBtn, menuBtn, descendBtn, cancelTargetBtn)
+
+    /** Built once: read on every frame by update, render and touch handling. */
+    private val buttons = listOf(
+        abilityBtn, waitBtn, bagBtn, menuBtn, descendBtn, cancelTargetBtn
+    )
+    private val mainButtons = listOf(abilityBtn, waitBtn, bagBtn, menuBtn)
+    private val statusBuffer = StringBuilder(64)
 
     init {
         turnEngine.refreshFov()
@@ -102,7 +109,7 @@ class GameScreen(
         val bw = (w - app.s(48f)) / 4f
         val by = h - app.s(78f)
         var bx = app.s(10f)
-        for (b in listOf(abilityBtn, waitBtn, bagBtn, menuBtn)) {
+        for (b in mainButtons) {
             b.layout(bx, by, bw, bh)
             bx += bw + app.s(9f)
         }
@@ -135,24 +142,14 @@ class GameScreen(
 
     companion object {
         private const val MAX_FLOATS = 24
+        private const val MINIMAP_CELL = 3
         private const val TARGET_NONE = 0
         private const val TARGET_TILE = 1
         private const val TARGET_ENEMY = 2
 
         /** Create a brand-new run starting on floor 1. */
         fun newRun(app: GameApp, cls: ClassType): GameState {
-            val rng = Rng()
-            val data = DungeonGenerator.generate(1, rng)
-            val player = Player(cls)
-            player.x = data.startX
-            player.y = data.startY
-            player.snapDraw()
-            player.addItem(ItemType.POTION_HEAL)
-            val st = GameState(1, player, data.map, rng)
-            st.enemies.addAll(data.enemies)
-            st.addLog("You enter the Emberdeep. Find the stairs down.", Palette.EMBER_BRIGHT)
-            st.addLog("Tap a tile to move. Tap an adjacent enemy to attack.", Palette.TEXT_DIM)
-            Fov.compute(st.map, player.x, player.y, TurnEngine.FOV_RADIUS)
+            val st = RunSetup.newRun(cls)
             app.profile.runs++
             app.saveProfile()
             app.saves.saveRun(st)
@@ -616,15 +613,25 @@ class GameScreen(
             c, pad, app.s(57f), barW, app.s(7f),
             p.xp.toFloat() / p.xpToNext, Palette.XP, Palette.XP_DARK
         )
-        var statusY = app.s(76f)
-        val statuses = ArrayList<String>()
-        if (p.strengthTurns > 0) statuses.add("Might ${p.strengthTurns}")
-        if (p.shieldTurns > 0) statuses.add("Stone ${p.shieldTurns}")
-        if (p.burnTurns > 0) statuses.add("BURNING ${p.burnTurns}")
-        if (p.autoCrit) statuses.add("Lethal")
+        val statusY = app.s(76f)
+        val statuses = statusBuffer
+        statuses.setLength(0)
+        if (p.strengthTurns > 0) statuses.append("Might ").append(p.strengthTurns)
+        if (p.shieldTurns > 0) {
+            if (statuses.isNotEmpty()) statuses.append("  ")
+            statuses.append("Stone ").append(p.shieldTurns)
+        }
+        if (p.burnTurns > 0) {
+            if (statuses.isNotEmpty()) statuses.append("  ")
+            statuses.append("BURNING ").append(p.burnTurns)
+        }
+        if (p.autoCrit) {
+            if (statuses.isNotEmpty()) statuses.append("  ")
+            statuses.append("Lethal")
+        }
         if (statuses.isNotEmpty()) {
             Draw.label(
-                c, statuses.joinToString("  "), pad, statusY, app.s(11f),
+                c, statuses.toString(), pad, statusY, app.s(11f),
                 if (p.burnTurns > 0) Palette.EMBER else Palette.INFO, font = Draw.sansBold
             )
         } else {
@@ -718,18 +725,21 @@ class GameScreen(
         for (b in buttons) b.render(c, app)
     }
 
+    /** Redraws the minimap into a reused bitmap: no per-refresh allocation. */
     private fun rebuildMinimap() {
         val map = state.map
-        val cell = 3
-        val bmp = minimapBmp?.takeIf {
-            it.width == map.width * cell && it.height == map.height * cell
-        } ?: Bitmap.createBitmap(
-            map.width * cell, map.height * cell, Bitmap.Config.ARGB_8888
-        ).also { minimapBmp = it }
-
+        val cell = MINIMAP_CELL
+        val bw = map.width * cell
+        val bh = map.height * cell
+        var bmp = minimapBmp
+        if (bmp == null || bmp.width != bw || bmp.height != bh) {
+            bmp = Bitmap.createBitmap(bw, bh, Bitmap.Config.ARGB_8888)
+            minimapBmp = bmp
+            minimapCanvas = Canvas(bmp)
+        }
         bmp.eraseColor(0x00000000)
-        val c = Canvas(bmp)
-        val paint = Paint()
+        val c = minimapCanvas ?: return
+        val paint = minimapPaint
         for (y in 0 until map.height) {
             for (x in 0 until map.width) {
                 val i = map.idx(x, y)
