@@ -3,8 +3,8 @@ Daemon will be stopped at the end of the build
 > Task :app:checkKotlinGradlePluginConfigurationErrors
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
-> Task :app:checkDebugAarMetadata
 > Task :app:generateDebugResValues FROM-CACHE
+> Task :app:checkDebugAarMetadata
 > Task :app:mapDebugSourceSetPaths
 > Task :app:generateDebugResources FROM-CACHE
 > Task :app:mergeDebugResources FROM-CACHE
@@ -24,9 +24,9 @@ Daemon will be stopped at the end of the build
 w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdeep/game/core/GameApp.kt:36:42 'VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java
 
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:bundleDebugClassesToCompileJar
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
 > Task :app:compileDebugUnitTestKotlin
 > Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :app:processDebugUnitTestJavaRes
@@ -95,11 +95,14 @@ PlayerTest > the inventory holds ten slots and stacks consumables PASSED
 
 SimulationTest > a lone hero on floor one is never instantly killed PASSED
 
+SimulationTest > a levelled and geared hero can kill the dragon STANDARD_OUT
+    EMBERDEEP ENDGAME: turns=59 swings=20 hits=8 misses=48 heals=7 hero=0/95 dragon=11 bossDefeated=false
+
 SimulationTest > a levelled and geared hero can kill the dragon FAILED
-    java.lang.AssertionError: the dragon must be killable by a levelled hero with endgame gear (survived 59 turns, hero at 0/95 hp, dragon at 11 hp)
+    java.lang.AssertionError: the dragon must be killable by a levelled hero with endgame gear (survived 59 turns, hero at 0/95 hp, dragon at 11 hp, swings=20 hits=8, misses=48, potions=7)
         at org.junit.Assert.fail(Assert.java:89)
         at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
-        at com.emberdeep.game.sim.SimulationTest.a levelled and geared hero can kill the dragon(SimulationTest.kt:111)
+        at com.emberdeep.game.sim.SimulationTest.a levelled and geared hero can kill the dragon(SimulationTest.kt:117)
 
 SimulationTest > twelve complete expeditions never break a structural invariant STANDARD_OUT
 
@@ -192,7 +195,7 @@ PathfinderTest > unexplored tiles can be excluded from the search PASSED
 54 tests completed, 3 failed
 
 > Task :app:testDebugUnitTest FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791305074298.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791305277831.json
 
 FAILURE: Build failed with an exception.
 

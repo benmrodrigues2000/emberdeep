@@ -2,19 +2,19 @@
 
 | | |
 |---|---|
-| commit | `10e509ce1ad20e80710a078213fbce77511d85b4` |
+| commit | `aeae4ad30ec74fd979b492d50377461774333675` |
 | branch | `arena/5d7dde7e-emberdeep` |
-| generated | 2026-10-06T16:46:25Z |
+| generated | 2026-10-06T16:49:53Z |
 | unit tests (exit 1) | FAIL |
 | apk/aab build (exit 0) | pass |
 
 ## Test failures
 
 ```
-    <failure message="java.lang.AssertionError: the dragon must be killable by a levelled hero with endgame gear (survived 59 turns, hero at 0/95 hp, dragon at 11 hp)" type="java.lang.AssertionError">java.lang.AssertionError: the dragon must be killable by a levelled hero with endgame gear (survived 59 turns, hero at 0/95 hp, dragon at 11 hp)
+    <failure message="java.lang.AssertionError: the dragon must be killable by a levelled hero with endgame gear (survived 59 turns, hero at 0/95 hp, dragon at 11 hp, swings=20 hits=8, misses=48, potions=7)" type="java.lang.AssertionError">java.lang.AssertionError: the dragon must be killable by a levelled hero with endgame gear (survived 59 turns, hero at 0/95 hp, dragon at 11 hp, swings=20 hits=8, misses=48, potions=7)
 	at org.junit.Assert.fail(Assert.java:89)
 	at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
-	at com.emberdeep.game.sim.SimulationTest.a levelled and geared hero can kill the dragon(SimulationTest.kt:111)
+	at com.emberdeep.game.sim.SimulationTest.a levelled and geared hero can kill the dragon(SimulationTest.kt:117)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -112,4 +112,5 @@ SimulationTest > the dungeon can be beaten and every run terminates FAILED
     ==============================================================
         at org.junit.Assert.fail(Assert.java:89)
         at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
+    EMBERDEEP ENDGAME: turns=59 swings=20 hits=8 misses=48 heals=7 hero=0/95 dragon=11 bossDefeated=false
 ```
