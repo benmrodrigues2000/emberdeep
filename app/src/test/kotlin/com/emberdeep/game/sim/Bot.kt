@@ -25,10 +25,13 @@ class RecordingEvents : TurnEvents {
     var heals = 0
     var teleports = 0
     var doors = 0
+    var swings = 0
+    var swingHits = 0
+    var misses = 0
 
     override fun onFloatText(x: Int, y: Int, text: String, color: Int, big: Boolean) { floats++ }
     override fun onStruck(x: Int, y: Int, color: Int, heavy: Boolean) { strikes++ }
-    override fun onMissEffect(x: Int, y: Int) {}
+    override fun onMissEffect(x: Int, y: Int) { misses++ }
     override fun onFire(x: Int, y: Int) {}
     override fun onHealEffect(x: Int, y: Int) { heals++ }
     override fun onEnemyDied(e: Enemy) { kills++ }
@@ -41,7 +44,10 @@ class RecordingEvents : TurnEvents {
     override fun onTeleport() { teleports++ }
     override fun onDoorOpened() { doors++ }
     override fun onPlayerHurt(heavy: Boolean) {}
-    override fun onAttackSwing(crit: Boolean, hit: Boolean) {}
+    override fun onAttackSwing(crit: Boolean, hit: Boolean) {
+        swings++
+        if (hit) swingHits++
+    }
 }
 
 /**
@@ -57,6 +63,13 @@ class Bot(private val rng: Rng) {
     /** Actions attempted for one turn; more than a couple means something is stuck. */
     private var attempts = 0
 
+    /**
+     * Tiles whose loot the hero already failed to pick up (a full pack, for
+     * example). Remembering them stops the bot from pacing back and forth over
+     * an item it can never take — which is how simulated runs used to stall.
+     */
+    private val uncollectable = HashSet<Int>()
+
     fun resetTurn() { attempts = 0 }
 
     /** @return true when a turn was consumed. */
@@ -67,6 +80,11 @@ class Bot(private val rng: Rng) {
         if (attempts > MAX_ATTEMPTS) {
             // Nothing the bot wants to do is available: burn the turn.
             return engine.waitTurn()
+        }
+
+        // Standing on loot that did not move into the pack means it never will.
+        if (state.map.itemAt(p.x, p.y) != null) {
+            uncollectable.add(p.y * state.map.width + p.x)
         }
 
         val onBossFloor = state.floor >= DungeonGenerator.FINAL_FLOOR
@@ -179,6 +197,8 @@ class Bot(private val rng: Rng) {
                 ItemKind.WEAPON, ItemKind.ARMOR -> if (!packFull && isUpgrade(p, type)) 2 else 0
             }
             if (value == 0) continue
+            if (!canPickUp(p, type)) continue
+            if (uncollectable.contains(gi.y * state.map.width + gi.x)) continue
             val distance = Pathfinder.dist(p.x, p.y, gi.x, gi.y)
             if (distance == 0 || distance > LOOT_RANGE) continue
             // Deterministic jitter breaks ties between equally good targets.
@@ -189,6 +209,13 @@ class Bot(private val rng: Rng) {
             }
         }
         return best
+    }
+
+    /** Mirrors [Player.addItem] so the bot never chases what it cannot take. */
+    private fun canPickUp(p: Player, type: ItemType): Boolean {
+        if (type.kind == ItemKind.GOLD) return true
+        if (type.stackable && p.inventory.any { it.type == type }) return true
+        return p.inventory.size < Player.MAX_SLOTS
     }
 
     private fun isUpgrade(p: Player, type: ItemType): Boolean = when (type.kind) {

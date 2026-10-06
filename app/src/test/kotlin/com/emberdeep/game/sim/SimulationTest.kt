@@ -108,11 +108,18 @@ class SimulationTest {
             turns++
         }
 
+        val dragonHp = floor.enemies.firstOrNull { it.type.name == "EMBER_DRAGON" }?.hp ?: 0
+        println(
+            "EMBERDEEP ENDGAME: turns=$turns swings=${events.swings} hits=${events.strikes} " +
+                "misses=${events.misses} heals=${events.heals} hero=${hero.hp}/${hero.maxHp} " +
+                "dragon=$dragonHp bossDefeated=${state.bossDefeated}"
+        )
         A.isTrue(
             state.bossDefeated,
             "the dragon must be killable by a levelled hero with endgame gear " +
                 "(survived $turns turns, hero at ${hero.hp}/${hero.maxHp} hp, " +
-                "dragon at ${floor.enemies.firstOrNull { it.type.name == "EMBER_DRAGON" }?.hp} hp)"
+                "dragon at $dragonHp hp, swings=${events.swings} hits=${events.strikes}, " +
+                "misses=${events.misses}, potions=${events.heals})"
         )
         A.eq(1, events.victories, "the victory event fires exactly once")
     }
