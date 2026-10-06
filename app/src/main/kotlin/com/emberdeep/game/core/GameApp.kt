@@ -7,6 +7,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import com.emberdeep.game.data.Profile
 import com.emberdeep.game.data.SaveManager
+import java.io.File
 import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
@@ -26,7 +27,7 @@ class GameApp(val context: Context) {
     fun s(v: Float): Float = v * scale
 
     val sprites = Sprites()
-    val saves = SaveManager(context)
+    val saves = SaveManager(File(context.filesDir))
     val profile: Profile = saves.loadProfile()
     val audio = Audio(context)
     val input = ConcurrentLinkedQueue<TouchEvent>()
@@ -146,6 +147,9 @@ class GameApp(val context: Context) {
         val snapshot: List<Screen> = synchronized(screens) { ArrayList(screens) }
         for (sc in snapshot) if (sc is PausableScreen) sc.onAppPause()
         saveProfile()
+        // The process may be killed at any moment after onPause: make sure any
+        // queued autosave has actually reached disk.
+        saves.flush()
     }
 
     fun onAppResume() {
@@ -153,6 +157,7 @@ class GameApp(val context: Context) {
     }
 
     fun onDestroy() {
+        saves.close()
         audio.release()
     }
 }

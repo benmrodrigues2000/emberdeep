@@ -11,8 +11,8 @@ android {
         applicationId = "com.emberdeep.game"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
     }
 
     signingConfigs {
@@ -52,9 +52,30 @@ android {
         getByName("main") {
             java.srcDirs("src/main/kotlin")
         }
+        // Headless JVM tests: pure logic (model, generation, systems, saves).
+        getByName("test") {
+            java.srcDirs("src/test/kotlin")
+        }
     }
 
     bundle {
         language { enableSplit = false }
     }
+}
+
+dependencies {
+    // Unit tests only — the shipped app has no runtime dependencies at all.
+    testImplementation("junit:junit:4.13.2")
+    // Real org.json on the JVM test classpath (Android provides its own).
+    testImplementation("org.json:json:20240303")
+}
+
+// Surface test output (including the balance simulation report) in CI logs.
+tasks.withType<Test>().configureEach {
+    testLogging {
+        events("passed", "failed", "skipped")
+        showStandardStreams = true
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+    maxHeapSize = "1280m"
 }

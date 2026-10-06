@@ -1,6 +1,6 @@
 package com.emberdeep.game.model
 
-import android.util.Base64
+import com.emberdeep.game.core.Codec
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -55,9 +55,9 @@ class DungeonMap(val width: Int, val height: Int) {
 
     fun toJson(): JSONObject = JSONObject().apply {
         put("w", width); put("h", height)
-        put("tiles", Base64.encodeToString(tiles, Base64.NO_WRAP))
-        put("var", Base64.encodeToString(variant, Base64.NO_WRAP))
-        put("explored", Base64.encodeToString(packBooleans(explored), Base64.NO_WRAP))
+        put("tiles", Codec.encodeBase64(tiles))
+        put("var", Codec.encodeBase64(variant))
+        put("explored", Codec.encodeBase64(packBooleans(explored)))
         put("sx", stairsX); put("sy", stairsY)
         val items = JSONArray()
         for (gi in groundItems) {
@@ -79,13 +79,14 @@ class DungeonMap(val width: Int, val height: Int) {
 
         fun fromJson(o: JSONObject): DungeonMap {
             val m = DungeonMap(o.getInt("w"), o.getInt("h"))
-            val t = Base64.decode(o.getString("tiles"), Base64.NO_WRAP)
-            t.copyInto(m.tiles, 0, 0, minOf(t.size, m.tiles.size))
-            val v = Base64.decode(o.optString("var", ""), Base64.NO_WRAP)
-            if (v.isNotEmpty()) v.copyInto(m.variant, 0, 0, minOf(v.size, m.variant.size))
-            unpackBooleans(
-                Base64.decode(o.optString("explored", ""), Base64.NO_WRAP), m.explored
-            )
+            val tiles = Codec.decodeBase64(o.optString("tiles", ""))
+            if (tiles != null) tiles.copyInto(m.tiles, 0, 0, minOf(tiles.size, m.tiles.size))
+            val variant = Codec.decodeBase64(o.optString("var", ""))
+            if (variant != null) {
+                variant.copyInto(m.variant, 0, 0, minOf(variant.size, m.variant.size))
+            }
+            val explored = Codec.decodeBase64(o.optString("explored", ""))
+            if (explored != null) unpackBooleans(explored, m.explored)
             m.stairsX = o.optInt("sx", -1)
             m.stairsY = o.optInt("sy", -1)
             val items = o.optJSONArray("items")

@@ -49,6 +49,12 @@ object Draw {
         }
     }
 
+    /** Fills a rounded rectangle using the shared scratch rect (allocation-free). */
+    fun roundRect(c: Canvas, l: Float, t: Float, r: Float, b: Float, radius: Float) {
+        rect.set(l, t, r, b)
+        c.drawRoundRect(rect, radius, radius, fill)
+    }
+
     fun bar(
         c: Canvas, l: Float, t: Float, w: Float, h: Float,
         fraction: Float, fg: Int, bg: Int
@@ -169,9 +175,7 @@ class Btn(
 
         if (cooldownFraction > 0.001f) {
             Draw.fill.color = Palette.alpha(0xFF000000.toInt(), 150)
-            c.drawRoundRect(
-                RectF(x, y + h * (1f - cooldownFraction), x + w, y + h), r, r, Draw.fill
-            )
+            Draw.roundRect(c, x, y + h * (1f - cooldownFraction), x + w, y + h, r)
         }
     }
 

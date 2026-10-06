@@ -22,6 +22,12 @@ object DungeonGenerator {
 
     const val FINAL_FLOOR = 10
 
+    /** Upper bound on connectivity repairs per floor (normally zero). */
+    private const val MAX_REPAIRS = 8
+
+    private val NEIGHBOUR_X = intArrayOf(1, -1, 0, 0)
+    private val NEIGHBOUR_Y = intArrayOf(0, 0, 1, -1)
+
     fun generate(floor: Int, rng: Rng): FloorData =
         if (floor >= FINAL_FLOOR) generateBossFloor(floor, rng)
         else generateStandard(floor, rng)
@@ -36,6 +42,9 @@ object DungeonGenerator {
         decorate(map, rng, floor)
 
         val startRoom = map.rooms.first()
+        // Rooms are chained as they are carved, but the geometry is only a
+        // promise until it is proven: walk the map and repair any orphan.
+        ensureConnectivity(map, rng, startRoom.cx, startRoom.cy)
         val endRoom = map.rooms.last()
         map.stairsX = endRoom.cx
         map.stairsY = endRoom.cy
@@ -116,6 +125,54 @@ object DungeonGenerator {
             map.rooms.add(a); map.rooms.add(b)
         }
     }
+
+    /**
+     * Guarantees every room can be walked to from the entrance.
+     *
+     * Chained room carving should already connect them, but a rare layout (or
+     * the emergency fallback in [carveRooms]) can leave one isolated. Rather
+     * than trusting the geometry, the generator proves it with a flood fill
+     * and carves a corridor to the nearest reached room when needed.
+     */
+    private fun ensureConnectivity(map: DungeonMap, rng: Rng, startX: Int, startY: Int) {
+        for (attempt in 0 until MAX_REPAIRS) {
+            val reached = floodFill(map, startX, startY)
+            val orphan = map.rooms.firstOrNull { !reached[map.idx(it.cx, it.cy)] } ?: return
+            val anchor = map.rooms
+                .filter { reached[map.idx(it.cx, it.cy)] }
+                .minByOrNull { manhattan(it.cx, it.cy, orphan.cx, orphan.cy) } ?: return
+            connect(map, rng, anchor, orphan)
+        }
+    }
+
+    /** @return the tiles reachable on foot from (sx, sy). */
+    private fun floodFill(map: DungeonMap, sx: Int, sy: Int): BooleanArray {
+        val seen = BooleanArray(map.width * map.height)
+        val queue = IntArray(map.width * map.height)
+        var head = 0
+        var tail = 0
+        seen[map.idx(sx, sy)] = true
+        queue[tail++] = map.idx(sx, sy)
+        while (head < tail) {
+            val i = queue[head++]
+            val x = i % map.width
+            val y = i / map.width
+            for (d in 0 until 4) {
+                val nx = x + NEIGHBOUR_X[d]
+                val ny = y + NEIGHBOUR_Y[d]
+                if (!map.inBounds(nx, ny) || !map.isWalkable(nx, ny)) continue
+                val ni = map.idx(nx, ny)
+                if (!seen[ni]) {
+                    seen[ni] = true
+                    queue[tail++] = ni
+                }
+            }
+        }
+        return seen
+    }
+
+    private fun manhattan(x0: Int, y0: Int, x1: Int, y1: Int): Int =
+        Math.abs(x1 - x0) + Math.abs(y1 - y0)
 
     private fun carveRoom(map: DungeonMap, room: Room) {
         for (yy in room.y until room.y + room.h) {

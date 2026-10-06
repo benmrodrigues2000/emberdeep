@@ -49,6 +49,12 @@ class TurnEngine(
     var gameEnded = false
         private set
 
+    /**
+     * Set when a class ability consumed its cooldown this turn, so the end of
+     * turn tick does not immediately shave a turn off it (off-by-one).
+     */
+    private var abilityUsedThisTurn = false
+
     fun refreshFov() {
         Fov.compute(map, player.x, player.y, FOV_RADIUS)
     }
@@ -258,6 +264,7 @@ class TurnEngine(
         events.onAttackSwing(crit = true, hit = true)
         for (e in targets) meleeAttack(e, bonusDmg = 4, silentSwing = true)
         player.abilityCd = player.classType.abilityCooldown
+        abilityUsedThisTurn = true
         endPlayerTurn()
         return true
     }
@@ -274,6 +281,7 @@ class TurnEngine(
         player.snapDraw()
         player.autoCrit = true
         player.abilityCd = player.classType.abilityCooldown
+        abilityUsedThisTurn = true
         log("You melt into shadow. Your next strike will be lethal.", Palette.INFO)
         events.onTeleport()
         pickupHere()
@@ -294,6 +302,7 @@ class TurnEngine(
         log("Your firebolt sears the ${target.type.display} for $dmg!", Palette.EMBER_BRIGHT)
         if (target.hp <= 0) killEnemy(target)
         player.abilityCd = player.classType.abilityCooldown
+        abilityUsedThisTurn = true
         endPlayerTurn()
         return true
     }
@@ -379,7 +388,8 @@ class TurnEngine(
         // Player status effects.
         if (player.strengthTurns > 0) player.strengthTurns--
         if (player.shieldTurns > 0) player.shieldTurns--
-        if (player.abilityCd > 0) player.abilityCd--
+        if (player.abilityCd > 0 && !abilityUsedThisTurn) player.abilityCd--
+        abilityUsedThisTurn = false
         if (player.burnTurns > 0) {
             player.burnTurns--
             damagePlayer(2, "The flames sear you for 2!", heavy = false)
@@ -511,6 +521,7 @@ class TurnEngine(
     }
 
     private fun moveEnemyTowardPlayer(e: Enemy) {
+        val map = state.map
         if (e.type.special == EnemySpecial.PHASE ||
             e.type.special == EnemySpecial.DRAIN
         ) {
@@ -521,15 +532,19 @@ class TurnEngine(
                 return
             }
         }
-        val path = Pathfinder.find(
+        // Tiles held by allies are expensive rather than impassable, so packs
+        // take a detour instead of queueing up behind each other, and the step
+        // is only taken when the destination is genuinely free.
+        val step = Pathfinder.nextStep(
             state, e.x, e.y, player.x, player.y,
-            ignoreOccupied = false, exploredOnly = false
+            blockOccupied = false, exploredOnly = false
         )
-        if (path.isNotEmpty()) {
-            val step = path.first()
-            if (!state.isOccupied(step[0], step[1])) {
-                e.x = step[0]; e.y = step[1]
-            }
+        if (step < 0) return
+        val nx = step % map.width
+        val ny = step / map.width
+        if (!state.isOccupied(nx, ny)) {
+            e.x = nx
+            e.y = ny
         }
     }
 
