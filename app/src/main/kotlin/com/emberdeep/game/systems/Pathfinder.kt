@@ -209,7 +209,10 @@ object Pathfinder {
     // --- Binary min-heap over tile indices ------------------------------- //
 
     private fun heapPush(node: Int, cost: Int, g: Int) {
-        if (heapSize >= heapNode.size) return
+        // Lazy deletion means duplicates can exceed the node count, so the
+        // heap grows on demand rather than dropping entries (dropping one
+        // would make a reachable target look unreachable).
+        if (heapSize >= heapNode.size) growHeap()
         var i = heapSize++
         heapNode[i] = node
         heapCost[i] = cost
@@ -243,6 +246,13 @@ object Pathfinder {
             }
         }
         return poppedNode
+    }
+
+    private fun growHeap() {
+        val capacity = (heapNode.size * 2).coerceAtLeast(64)
+        heapNode = heapNode.copyOf(capacity)
+        heapCost = heapCost.copyOf(capacity)
+        heapG = heapG.copyOf(capacity)
     }
 
     private fun heapSwap(a: Int, b: Int) {

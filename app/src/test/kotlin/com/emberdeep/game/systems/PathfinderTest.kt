@@ -57,7 +57,7 @@ class PathfinderTest {
         A.isTrue(Pathfinder.find(s, 1, 5, 9, 5, blockOccupied = true).isEmpty(), "blocked corridor")
         val free = Pathfinder.find(s, 1, 5, 9, 5, blockOccupied = false)
         A.eq(8, free.size, "monsters walk through allies as a last resort")
-        A.eq(1, Pathfinder.nextStep(s, 1, 5, 9, 5, blockOccupied = true), "no step when blocked")
+        A.eq(-1, Pathfinder.nextStep(s, 1, 5, 9, 5, blockOccupied = true), "no step when blocked")
     }
 
     @Test
@@ -120,6 +120,33 @@ class PathfinderTest {
             A.eq(first[i][0], second[i][0], "repeat x at $i")
             A.eq(first[i][1], second[i][1], "repeat y at $i")
         }
+    }
+
+    @Test
+    fun `long searches on the biggest floors still find a route`() {
+        // Regression: the search heap used to drop entries once it filled up,
+        // which made distant targets on late, large floors unreachable.
+        val rng = Rng(24601L)
+        val data = com.emberdeep.game.gen.DungeonGenerator.generate(9, rng)
+        var found = 0
+        var missing = 0
+        var index = 0
+        val state = state(data.map, data.startX, data.startY)
+        for (y in 0 until data.map.height) {
+            for (x in 0 until data.map.width) {
+                if (!data.map.isWalkable(x, y)) continue
+                // Sampling every eleventh tile keeps the test fast while still
+                // covering the far corners of a 46x46 floor.
+                if (index++ % 11 != 0) continue
+                if (Pathfinder.find(state, data.startX, data.startY, x, y).isNotEmpty()) {
+                    found++
+                } else {
+                    missing++
+                }
+            }
+        }
+        A.isTrue(found > 50, "expected a walkable floor (found $found)")
+        A.eq(0, missing, "every walkable tile must be reachable on a proved floor")
     }
 
     @Test

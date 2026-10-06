@@ -124,7 +124,13 @@ class Bot(private val rng: Rng) {
             state, p.x, p.y, tx, ty,
             blockOccupied = false, exploredOnly = false
         )
-        if (path.isEmpty()) return false
+        if (path.isEmpty()) {
+            // No route: fall back to a greedy step so a run can never stall
+            // waiting for an objective it will never reach.
+            val greedy = Pathfinder.greedyStep(p.x, p.y, tx, ty)
+            if (!state.map.isWalkable(greedy[0], greedy[1])) return false
+            return engine.tryMove(greedy[0] - p.x, greedy[1] - p.y)
+        }
         val step = path.first()
         return engine.tryMove(step[0] - p.x, step[1] - p.y)
     }

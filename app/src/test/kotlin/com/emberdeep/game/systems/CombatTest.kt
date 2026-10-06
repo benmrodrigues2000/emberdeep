@@ -32,7 +32,7 @@ class CombatTest {
             val result = Combat.playerAttack(rng, hero(), target)
             if (result.hit) {
                 hits++
-                A.within(result.dmg, 1, 14, "damage roll")
+                A.within(result.dmg, 1, 17, "damage roll (1d8+1, doubled dice on a crit)")
                 A.eq(target.hp, 10_000 - result.dmg, "damage must be applied to the target")
                 if (result.crit) crits++
             } else {
