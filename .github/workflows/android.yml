@@ -28,18 +28,24 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # Both steps capture their real exit code into an output and always let
+      # the job continue, so a single run reports tests, build and the balance
+      # simulation together. The gate step at the end fails the job.
       - name: Unit tests, invariant fuzzing and balance simulation
         id: tests
-        continue-on-error: true
-        run: ./gradlew --no-daemon :app:testDebugUnitTest 2>&1 | tee ci-test-output.txt
+        run: |
+          ./gradlew --no-daemon :app:testDebugUnitTest 2>&1 | tee ci-test-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
       - name: Build debug APK, release APK and release AAB
         id: build
-        if: steps.tests.outcome == 'success'
-        run: ./gradlew --no-daemon :app:assembleDebug :app:assembleRelease :app:bundleRelease --stacktrace
+        run: |
+          ./gradlew --no-daemon :app:assembleDebug :app:assembleRelease :app:bundleRelease --stacktrace \
+            2>&1 | tee ci-build-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
 
       - name: Collect outputs
-        if: steps.build.outcome == 'success'
+        if: steps.build.outputs.exit_code == '0'
         run: |
           mkdir -p dist
           cp app/build/outputs/apk/debug/app-debug.apk         dist/Emberdeep-debug.apk
@@ -47,9 +53,9 @@ jobs:
           cp app/build/outputs/bundle/release/app-release.aab  dist/Emberdeep-release.aab
           ls -la dist/
 
-      # The runner's log storage is not always reachable from every
-      # environment, so the outcome is also published into the repository
-      # itself (ci/last-test-run.md + the raw log) where it is always readable.
+      # Runner log storage is not reachable from every environment, so the
+      # outcome is also published into the repository itself where it is
+      # always readable.
       - name: Publish CI report
         if: always()
         run: |
@@ -62,28 +68,29 @@ jobs:
             echo "| commit | \`${GITHUB_SHA}\` |"
             echo "| branch | \`${GITHUB_REF_NAME}\` |"
             echo "| generated | $(date -u +%Y-%m-%dT%H:%M:%SZ) |"
-            echo "| unit tests | ${{ steps.tests.outcome }} |"
-            echo "| debug/release builds | ${{ steps.build.outcome }} |"
+            echo "| unit tests (exit ${{ steps.tests.outputs.exit_code }}) | ${{ steps.tests.outputs.exit_code == '0' && 'pass' || 'FAIL' }} |"
+            echo "| apk/aab build (exit ${{ steps.build.outputs.exit_code }}) | ${{ steps.build.outputs.exit_code == '0' && 'pass' || 'FAIL' }} |"
             echo
             echo "## Test failures"
             echo
             echo '```'
-            grep -h -A12 "<failure\|<error" app/build/test-results/testDebugUnitTest/*.xml 2>/dev/null | head -160 || true
+            grep -h -A14 "<failure\|<error" app/build/test-results/testDebugUnitTest/*.xml 2>/dev/null | head -200 || true
             echo '```'
             echo
-            echo "## Compiler errors"
+            echo "## Compiler errors and failed tasks"
             echo
             echo '```'
-            grep -h "^e: " ci-test-output.txt 2>/dev/null | head -80 || true
+            grep -h "^e: \|^w: .*GameApp\|FAILURE\|Task .* FAILED" ci-test-output.txt ci-build-output.txt 2>/dev/null | head -60 || true
             echo '```'
             echo
             echo "## Balance simulation"
             echo
             echo '```'
-            grep -A30 "EMBERDEEP BALANCE SIMULATION" ci-test-output.txt 2>/dev/null | head -45 || true
+            grep -A26 "EMBERDEEP BALANCE SIMULATION" ci-test-output.txt 2>/dev/null | head -40 || true
             echo '```'
           } > ci/last-test-run.md
           tail -c 120000 ci-test-output.txt > ci/last-test-output.txt 2>/dev/null || true
+          tail -c 60000 ci-build-output.txt > ci/last-build-output.txt 2>/dev/null || true
 
       - name: Upload artifacts
         if: always()
@@ -109,7 +116,7 @@ jobs:
           fi
 
       - name: Fail the job when tests or builds failed
-        if: steps.tests.outcome == 'failure' || steps.build.outcome == 'failure'
+        if: steps.tests.outputs.exit_code != '0' || steps.build.outputs.exit_code != '0'
         run: |
-          echo "CI failed — see ci/last-test-run.md and ci/last-test-output.txt"
+          echo "CI failed — see ci/last-test-run.md, ci/last-test-output.txt, ci/last-build-output.txt"
           exit 1

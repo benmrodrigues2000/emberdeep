@@ -7,7 +7,6 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import com.emberdeep.game.data.Profile
 import com.emberdeep.game.data.SaveManager
-import java.io.File
 import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
@@ -27,7 +26,7 @@ class GameApp(val context: Context) {
     fun s(v: Float): Float = v * scale
 
     val sprites = Sprites()
-    val saves = SaveManager(File(context.filesDir))
+    val saves = SaveManager(context.filesDir)
     val profile: Profile = saves.loadProfile()
     val audio = Audio(context)
     val input = ConcurrentLinkedQueue<TouchEvent>()
