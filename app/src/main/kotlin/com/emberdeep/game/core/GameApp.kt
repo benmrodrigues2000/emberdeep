@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.os.VibratorManager
 import com.emberdeep.game.data.Profile
 import com.emberdeep.game.data.SaveManager
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -33,7 +34,13 @@ class GameApp(val context: Context) {
 
     private val screens = ArrayList<Screen>()
     private val vibrator: Vibrator? =
-        context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager)
+                ?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+        }
 
     init {
         audio.soundEnabled = profile.sound
