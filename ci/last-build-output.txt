@@ -55,12 +55,12 @@ Daemon will be stopped at the end of the build
 > Task :app:processReleaseMainManifest
 > Task :app:processReleaseManifest
 > Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:extractProguardFiles
 > Task :app:processReleaseManifestForPackage
+> Task :app:mergeReleaseJniLibFolders
 > Task :app:packageDebug
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
-> Task :app:extractProguardFiles
-> Task :app:mergeReleaseJniLibFolders
 > Task :app:mergeReleaseNativeLibs NO-SOURCE
 > Task :app:stripReleaseDebugSymbols NO-SOURCE
 > Task :app:extractReleaseNativeSymbolTables NO-SOURCE
@@ -109,7 +109,7 @@ Daemon will be stopped at the end of the build
 > Task :app:lintVitalReportRelease
 > Task :app:lintVitalRelease
 > Task :app:assembleRelease
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1791306561296.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1791307701608.json
 
-BUILD SUCCESSFUL in 59s
+BUILD SUCCESSFUL in 1m 4s
 90 actionable tasks: 59 executed, 15 from cache, 16 up-to-date

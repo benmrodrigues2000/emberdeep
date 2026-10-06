@@ -21,9 +21,9 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugResources
 > Task :app:compileDebugKotlin
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes
 > Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
-> Task :app:processDebugJavaRes
 
 > Task :app:compileDebugUnitTestKotlin
 w: file:///home/runner/work/emberdeep/emberdeep/app/src/test/kotlin/com/emberdeep/game/sim/Bot.kt:185:13 Variable 'p' is never used
@@ -174,7 +174,7 @@ TurnEngineTest > the dead can no longer act PASSED
 TurnEngineTest > attacking a wall-phasing monster inside rock leaves no unreachable loot PASSED
 
 TurnEngineTest > walking into rock is refused and costs no turn PASSED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791306514807.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791307650362.json
 
-BUILD SUCCESSFUL in 47s
+BUILD SUCCESSFUL in 52s
 23 actionable tasks: 15 executed, 8 from cache
