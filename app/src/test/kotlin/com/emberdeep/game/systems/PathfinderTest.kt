@@ -122,31 +122,71 @@ class PathfinderTest {
         }
     }
 
-    @Test
-    fun `long searches on the biggest floors still find a route`() {
-        // Regression: the search heap used to drop entries once it filled up,
-        // which made distant targets on late, large floors unreachable.
-        val rng = Rng(24601L)
-        val data = com.emberdeep.game.gen.DungeonGenerator.generate(9, rng)
-        var found = 0
-        var missing = 0
-        var index = 0
-        val state = state(data.map, data.startX, data.startY)
-        for (y in 0 until data.map.height) {
-            for (x in 0 until data.map.width) {
-                if (!data.map.isWalkable(x, y)) continue
-                // Sampling keeps the test fast while still covering the far
-                // corners of a 46x46 floor.
-                if (index++ % 5 != 0) continue
-                if (Pathfinder.find(state, data.startX, data.startY, x, y).isNotEmpty()) {
-                    found++
-                } else {
-                    missing++
+    /** Tiles reachable on foot from (sx, sy), ignoring monsters. */
+    private fun floodFill(map: DungeonMap, sx: Int, sy: Int): BooleanArray {
+        val seen = BooleanArray(map.width * map.height)
+        val queue = IntArray(map.width * map.height)
+        var head = 0
+        var tail = 0
+        seen[map.idx(sx, sy)] = true
+        queue[tail++] = map.idx(sx, sy)
+        while (head < tail) {
+            val i = queue[head++]
+            val x = i % map.width
+            val y = i / map.width
+            for (d in 0 until 4) {
+                val nx = x + DX[d]
+                val ny = y + DY[d]
+                if (!map.inBounds(nx, ny) || !map.isWalkable(nx, ny)) continue
+                val ni = map.idx(nx, ny)
+                if (!seen[ni]) {
+                    seen[ni] = true
+                    queue[tail++] = ni
                 }
             }
         }
-        A.isTrue(found >= 20, "expected a walkable floor (found $found)")
-        A.eq(0, missing, "every walkable tile must be reachable on a proved floor")
+        return seen
+    }
+
+    private companion object {
+        val DX = intArrayOf(1, -1, 0, 0)
+        val DY = intArrayOf(0, 0, 1, -1)
+    }
+
+    @Test
+    fun `A star agrees with a flood fill across a whole late floor`() {
+        // Regression: the search heap used to drop entries once it filled up,
+        // which made distant targets on late, large floors look unreachable.
+        val rng = Rng(24601L)
+        val data = com.emberdeep.game.gen.DungeonGenerator.generate(9, rng)
+        val map = data.map
+        val start = state(map, data.startX, data.startY)
+        val reachable = floodFill(map, data.startX, data.startY)
+
+        var unreachableTiles = 0
+        var sampled = 0
+        var mismatches = 0
+        var detail = ""
+        var index = 0
+        for (y in 0 until map.height) {
+            for (x in 0 until map.width) {
+                if (!map.isWalkable(x, y)) continue
+                val flood = reachable[map.idx(x, y)]
+                if (!flood) unreachableTiles++
+                // The hero's own tile is trivially "no path needed".
+                if (x == data.startX && y == data.startY) continue
+                if (index++ % 5 != 0) continue
+                sampled++
+                val found = Pathfinder.find(start, data.startX, data.startY, x, y).isNotEmpty()
+                if (found != flood) {
+                    mismatches++
+                    detail = "($x, $y) A*=$found floodFill=$flood"
+                }
+            }
+        }
+        A.eq(0, unreachableTiles, "the generator must connect every walkable tile")
+        A.isTrue(sampled >= 20, "expected to sample a walkable floor (sampled $sampled)")
+        A.eq(0, mismatches, "A* disagrees with the flood fill at $detail")
     }
 
     @Test

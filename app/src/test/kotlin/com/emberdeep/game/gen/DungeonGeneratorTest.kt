@@ -49,6 +49,12 @@ class DungeonGeneratorTest {
                 A.isTrue(map.rooms.isNotEmpty(), "$where: has rooms")
                 A.isTrue(seen[map.idx(data.startX, data.startY)], "$where: start reachable")
 
+                // Nothing walkable may be walled off from the entrance.
+                for (i in map.tiles.indices) {
+                    if (!map.isWalkable(i % map.width, i / map.width)) continue
+                    A.isTrue(seen[i], "$where: walkable tile (${i % map.width}, ${i / map.width}) is sealed off")
+                }
+
                 if (floor < DungeonGenerator.FINAL_FLOOR) {
                     A.isTrue(map.isWalkable(map.stairsX, map.stairsY), "$where: stairs walkable")
                     A.isTrue(

@@ -53,20 +53,32 @@ class RecordingEvents : TurnEvents {
 /**
  * A scripted adventurer that plays a real run through the real [TurnEngine].
  *
- * It is intentionally a *competent but not perfect* player: it beelines for the
+ * Intentionally a *competent but not perfect* player: it beelines for the
  * stairs, fights whatever blocks the path, heals when hurt, uses its class
  * ability and prepares for the boss. Its win rate therefore measures how
  * winnable the game is, and any invariant violation it hits is a genuine bug.
+ *
+ * Two policy details matter for the simulation to be meaningful:
+ *
+ *  * **Goals are committed.** Weighing every item on the floor freshly each
+ *    turn made the bot pace back and forth between two treasures forever
+ *    (Manhattan distance rises while walking around a wall), so a chosen
+ *    destination is kept until it is reached or abandoned.
+ *  * **Treasure trips are bounded** by real path length and by a turn budget,
+ *    so looting can never crowd out descending.
  */
 class Bot(private val rng: Rng) {
 
-    /** Actions attempted for one turn; more than a couple means something is stuck. */
+    /** Actions attempted for one turn; more than expected means it is stuck. */
     private var attempts = 0
+
+    /** The treasure the bot has currently committed to, if any. */
+    private var lootGoal: IntArray? = null
+    private var lootTurns = 0
 
     /**
      * Tiles whose loot the hero already failed to pick up (a full pack, for
-     * example). Remembering them stops the bot from pacing back and forth over
-     * an item it can never take — which is how simulated runs used to stall.
+     * example): remembered so it is never chased again.
      */
     private val uncollectable = HashSet<Int>()
 
@@ -85,6 +97,7 @@ class Bot(private val rng: Rng) {
         // Standing on loot that did not move into the pack means it never will.
         if (state.map.itemAt(p.x, p.y) != null) {
             uncollectable.add(p.y * state.map.width + p.x)
+            lootGoal = null
         }
 
         val onBossFloor = state.floor >= DungeonGenerator.FINAL_FLOOR
@@ -131,15 +144,18 @@ class Bot(private val rng: Rng) {
             if (engine.descend()) return true
         }
 
-        // 7. Loot when it is cheap, useful and can actually be picked up.
-        val item = lootTarget(state)
-        if (item != null && stepToward(state, engine, item[0], item[1])) return true
+        // 7. Treasure — a committed, bounded detour.
+        if (stepToLoot(state, engine)) return true
 
         // 8. Objective: the stairs, or the dragon on the final floor.
         val goal = objective(state) ?: return engine.waitTurn()
         if (stepToward(state, engine, goal[0], goal[1])) return true
         return engine.waitTurn()
     }
+
+    // ------------------------------------------------------------------ //
+    // Movement
+    // ------------------------------------------------------------------ //
 
     /** One step of the path towards (tx, ty); attacks whatever blocks the way. */
     private fun stepToward(state: GameState, engine: TurnEngine, tx: Int, ty: Int): Boolean {
@@ -150,8 +166,8 @@ class Bot(private val rng: Rng) {
             blockOccupied = false, exploredOnly = false
         )
         if (path.isEmpty()) {
-            // No route: fall back to a greedy step so a run can never stall
-            // waiting for an objective it will never reach.
+            // No route: take a greedy step so a run can never stall waiting for
+            // something it will never reach.
             val greedy = Pathfinder.greedyStep(p.x, p.y, tx, ty)
             if (!state.map.isWalkable(greedy[0], greedy[1])) return false
             return engine.tryMove(greedy[0] - p.x, greedy[1] - p.y)
@@ -159,6 +175,84 @@ class Bot(private val rng: Rng) {
         val step = path.first()
         return engine.tryMove(step[0] - p.x, step[1] - p.y)
     }
+
+    /**
+     * Walks towards the committed treasure, choosing one when none is held.
+     *
+     * @return true when a turn was consumed.
+     */
+    private fun stepToLoot(state: GameState, engine: TurnEngine): Boolean {
+        val p = state.player
+        var goal = lootGoal
+
+        if (goal != null) {
+            val stillThere = state.map.itemAt(goal[0], goal[1]) != null
+            val expired = ++lootTurns > LOOT_TURN_BUDGET
+            if (!stillThere || expired) {
+                goal = null
+                lootGoal = null
+            }
+        }
+
+        if (goal == null) {
+            goal = chooseLoot(state) ?: return false
+            lootGoal = goal
+            lootTurns = 0
+        }
+
+        if (stepToward(state, engine, goal[0], goal[1])) return true
+        // Cannot get there after all: give up on this piece.
+        uncollectable.add(goal[1] * state.map.width + goal[0])
+        lootGoal = null
+        return false
+    }
+
+    /**
+     * The most valuable treasure worth a real detour.
+     *
+     * Uses path length (not straight-line distance) and only items the pack can
+     * actually accept — both of which the simulation proved necessary.
+     */
+    private fun chooseLoot(state: GameState): IntArray? {
+        val p = state.player
+        val potions = countPotions(state)
+        val onBossFloor = state.floor >= DungeonGenerator.FINAL_FLOOR
+        val budget = if (onBossFloor) BOSS_LOOT_PATH_LIMIT else LOOT_PATH_LIMIT
+        var bestScore = Int.MAX_VALUE
+        var best: IntArray? = null
+
+        for (gi in state.map.groundItems) {
+            val type = gi.item.type
+            val value = when (type.kind) {
+                ItemKind.GOLD -> if (gi.gold >= 15) 2 else 5
+                ItemKind.POTION, ItemKind.SCROLL -> when {
+                    type == ItemType.POTION_STRENGTH || type == ItemType.POTION_SHIELD -> 2
+                    potions < 3 -> 1
+                    else -> 4
+                }
+                ItemKind.WEAPON, ItemKind.ARMOR -> if (isUpgrade(p, type)) 2 else 0
+            }
+            if (value == 0) continue
+            if (!canPickUp(p, type)) continue
+            if (uncollectable.contains(gi.y * state.map.width + gi.x)) continue
+            if (Pathfinder.dist(p.x, p.y, gi.x, gi.y) > LOOT_RANGE) continue
+            val path = Pathfinder.find(
+                state, p.x, p.y, gi.x, gi.y,
+                blockOccupied = false, exploredOnly = false
+            )
+            if (path.isEmpty() || path.size > budget) continue
+            val score = path.size * value + rng.nextInt(2)
+            if (score < bestScore) {
+                bestScore = score
+                best = intArrayOf(gi.x, gi.y)
+            }
+        }
+        return best
+    }
+
+    // ------------------------------------------------------------------ //
+    // Objectives and gear
+    // ------------------------------------------------------------------ //
 
     private fun objective(state: GameState): IntArray? {
         val map = state.map
@@ -172,43 +266,20 @@ class Bot(private val rng: Rng) {
         return intArrayOf(map.stairsX, map.stairsY)
     }
 
-    /**
-     * Loot worth a *short* detour.
-     *
-     * Crucially the bot only chases things it can actually pick up — chasing a
-     * piece of gear with a full pack made simulated heroes wander a floor
-     * forever instead of taking the stairs.
-     */
-    private fun lootTarget(state: GameState): IntArray? {
-        val p = state.player
-        val potions = countPotions(state)
-        val packFull = p.inventory.size >= Player.MAX_SLOTS
-        var bestScore = Int.MAX_VALUE
-        var best: IntArray? = null
-        for (gi in state.map.groundItems) {
-            val type = gi.item.type
-            val value = when (type.kind) {
-                ItemKind.GOLD -> if (gi.gold >= 15) 2 else 5
-                ItemKind.POTION, ItemKind.SCROLL -> when {
-                    type == ItemType.POTION_STRENGTH || type == ItemType.POTION_SHIELD -> 2
-                    potions < 3 -> 1
-                    else -> 4
-                }
-                ItemKind.WEAPON, ItemKind.ARMOR -> if (!packFull && isUpgrade(p, type)) 2 else 0
-            }
-            if (value == 0) continue
-            if (!canPickUp(p, type)) continue
-            if (uncollectable.contains(gi.y * state.map.width + gi.x)) continue
-            val distance = Pathfinder.dist(p.x, p.y, gi.x, gi.y)
-            if (distance == 0 || distance > LOOT_RANGE) continue
-            // Deterministic jitter breaks ties between equally good targets.
-            val score = distance * value + rng.nextInt(2)
-            if (score < bestScore) {
-                bestScore = score
-                best = intArrayOf(gi.x, gi.y)
-            }
-        }
-        return best
+    private fun countPotions(state: GameState): Int =
+        state.player.inventory
+            .filter { it.type == ItemType.POTION_HEAL || it.type == ItemType.POTION_GREATER_HEAL }
+            .sumOf { it.count }
+
+    private fun drink(state: GameState, engine: TurnEngine, type: ItemType): Boolean {
+        val item = state.player.inventory.firstOrNull { it.type == type && it.count > 0 } ?: return false
+        return engine.useItem(item)
+    }
+
+    private fun readScroll(state: GameState, engine: TurnEngine, type: ItemType): Boolean {
+        val scroll = state.player.inventory.firstOrNull { it.type == type && it.count > 0 }
+            ?: return false
+        return engine.useItem(scroll)
     }
 
     /** Mirrors [Player.addItem] so the bot never chases what it cannot take. */
@@ -233,24 +304,12 @@ class Bot(private val rng: Rng) {
         engine.useItem(better)
     }
 
-    private fun readScroll(state: GameState, engine: TurnEngine, type: ItemType): Boolean {
-        val scroll = state.player.inventory.firstOrNull { it.type == type && it.count > 0 }
-            ?: return false
-        return engine.useItem(scroll)
-    }
-
     private fun visibleEnemies(state: GameState): Int =
         state.enemies.count { it.hp > 0 && state.map.isVisible(it.x, it.y) }
 
-    private fun countPotions(state: GameState): Int =
-        state.player.inventory
-            .filter { it.type == ItemType.POTION_HEAL || it.type == ItemType.POTION_GREATER_HEAL }
-            .sumOf { it.count }
-
-    private fun drink(state: GameState, engine: TurnEngine, type: ItemType): Boolean {
-        val item = state.player.inventory.firstOrNull { it.type == type && it.count > 0 } ?: return false
-        return engine.useItem(item)
-    }
+    // ------------------------------------------------------------------ //
+    // Class abilities
+    // ------------------------------------------------------------------ //
 
     private fun useAbility(state: GameState, engine: TurnEngine): Boolean {
         val p = state.player
@@ -301,6 +360,17 @@ class Bot(private val rng: Rng) {
         const val MAX_ATTEMPTS = 6
         const val HEAL_THRESHOLD = 45
         const val BOSS_HEAL_THRESHOLD = 60
-        const val LOOT_RANGE = 10
+
+        /** Straight-line distance beyond which a target is not even considered. */
+        const val LOOT_RANGE = 12
+
+        /** Path lengths a treasure detour may cost on a normal floor. */
+        const val LOOT_PATH_LIMIT = 14
+
+        /** …and on the dragon's floor, where time is health. */
+        const val BOSS_LOOT_PATH_LIMIT = 8
+
+        /** A committed detour is abandoned after this many turns. */
+        const val LOOT_TURN_BUDGET = 30
     }
 }

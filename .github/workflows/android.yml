@@ -87,7 +87,7 @@ jobs:
             echo
             echo '```'
             grep -A26 "EMBERDEEP BALANCE SIMULATION" ci-test-output.txt 2>/dev/null | head -40 || true
-            grep "EMBERDEEP ENDGAME" ci-test-output.txt 2>/dev/null | head -5 || true
+            grep "EMBERDEEP ENDGAME" ci-test-output.txt 2>/dev/null | head -8 || true
             echo '```'
           } > ci/last-test-run.md
           tail -c 120000 ci-test-output.txt > ci/last-test-output.txt 2>/dev/null || true
