@@ -2,7 +2,9 @@ package com.emberdeep.game.sim
 
 import com.emberdeep.game.core.Rng
 import com.emberdeep.game.model.ClassType
+import com.emberdeep.game.model.DungeonMap
 import com.emberdeep.game.model.GameState
+import com.emberdeep.game.systems.Pathfinder
 import com.emberdeep.game.systems.RunSetup
 import com.emberdeep.game.systems.TurnEngine
 
@@ -18,7 +20,9 @@ class RunResult(
     val kills: Int,
     val gold: Int,
     val turns: Int,
-    val violation: String?
+    val violation: String?,
+    /** Filled in for runs that hit the turn cap: what the bot was doing. */
+    val stuck: String? = null
 ) {
     val finished: Boolean get() = victory || died
 }
@@ -105,6 +109,7 @@ class Simulation(private val seed: Long, private val cls: ClassType) {
             if (++guard > maxTurns * 2) break
         }
         val p = state.player
+        val timedOut = !state.bossDefeated && p.hp > 0
         return RunResult(
             seed = seed,
             cls = cls,
@@ -116,8 +121,29 @@ class Simulation(private val seed: Long, private val cls: ClassType) {
             kills = p.kills,
             gold = p.gold,
             turns = state.turn,
-            violation = violation
+            violation = violation,
+            stuck = if (timedOut) describeStall() else null
         )
+    }
+
+    /** Everything needed to understand why a run could not finish. */
+    private fun describeStall(): String {
+        val p = state.player
+        val map = state.map
+        val adjacent = state.enemies.count { Pathfinder.dist(it.x, it.y, p.x, p.y) == 1 }
+        val visible = state.enemies.count { it.hp > 0 && map.isVisible(it.x, it.y) }
+        val stairsPath = if (map.stairsX >= 0) {
+            Pathfinder.find(state, p.x, p.y, map.stairsX, map.stairsY).size
+        } else {
+            -1
+        }
+        return "floor=${state.floor} hero=(${p.x},${p.y}) hp=${p.hp}/${p.maxHp} " +
+            "level=${p.level} kills=${p.kills} stairs=(${map.stairsX},${map.stairsY}) " +
+            "pathToStairs=$stairsPath adjacentEnemies=$adjacent visibleEnemies=$visible " +
+            "awake=${state.enemies.count { it.awake }} items=${map.groundItems.size} " +
+            "potions=${p.inventory.filter { it.type.name.contains("HEAL") }.sumOf { it.count }} " +
+            "rooms=${map.rooms.size} walkable=${map.tiles.count { it != DungeonMap.WALL }} | " +
+            state.log.takeLast(4).joinToString(" / ") { it.text }
     }
 
     companion object {
@@ -171,6 +197,9 @@ object BalanceReport {
         for (f in 1..10) if (byFloor[f] > 0) sb.append("F$f=${byFloor[f]}  ")
         sb.appendLine()
         violations.forEach { sb.appendLine("INVARIANT VIOLATION seed=${it.seed} class=${it.cls}: ${it.violation}") }
+        results.filter { it.stuck != null }.forEach {
+            sb.appendLine("TIMEOUT seed=${it.seed} ${it.cls.display}: ${it.stuck}")
+        }
         sb.appendLine("==============================================================")
         return sb.toString()
     }

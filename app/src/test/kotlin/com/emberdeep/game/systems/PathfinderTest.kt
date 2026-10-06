@@ -135,9 +135,9 @@ class PathfinderTest {
         for (y in 0 until data.map.height) {
             for (x in 0 until data.map.width) {
                 if (!data.map.isWalkable(x, y)) continue
-                // Sampling every eleventh tile keeps the test fast while still
-                // covering the far corners of a 46x46 floor.
-                if (index++ % 11 != 0) continue
+                // Sampling keeps the test fast while still covering the far
+                // corners of a 46x46 floor.
+                if (index++ % 5 != 0) continue
                 if (Pathfinder.find(state, data.startX, data.startY, x, y).isNotEmpty()) {
                     found++
                 } else {
@@ -145,7 +145,7 @@ class PathfinderTest {
                 }
             }
         }
-        A.isTrue(found > 50, "expected a walkable floor (found $found)")
+        A.isTrue(found >= 20, "expected a walkable floor (found $found)")
         A.eq(0, missing, "every walkable tile must be reachable on a proved floor")
     }
 

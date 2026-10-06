@@ -8,6 +8,7 @@ import com.emberdeep.game.model.EnemyType
 import com.emberdeep.game.model.GameState
 import com.emberdeep.game.model.ItemKind
 import com.emberdeep.game.model.ItemType
+import com.emberdeep.game.model.Player
 import com.emberdeep.game.systems.Pathfinder
 import com.emberdeep.game.systems.TurnEngine
 import com.emberdeep.game.systems.TurnEvents
@@ -87,10 +88,16 @@ class Bot(private val rng: Rng) {
             }
         }
 
-        // 3. Class ability.
+        // 3. Wear anything better, and unload an offensive scroll into a crowd.
+        equipUpgrades(state, engine)
+        if (visibleEnemies(state) >= 3 && readScroll(state, engine, ItemType.SCROLL_FIREBALL)) {
+            return true
+        }
+
+        // 4. Class ability.
         if (engine.abilityReady() && useAbility(state, engine)) return true
 
-        // 4. Attack anything adjacent (cheapest kill first).
+        // 5. Attack anything adjacent (cheapest kill first).
         val adjacent = state.enemies.filter {
             it.hp > 0 && Pathfinder.dist(it.x, it.y, p.x, p.y) == 1
         }
@@ -99,18 +106,18 @@ class Bot(private val rng: Rng) {
             if (engine.tryMove(target.x - p.x, target.y - p.y)) return true
         }
 
-        // 5. The stairs are right here.
+        // 6. The stairs are right here.
         if (p.x == state.map.stairsX && p.y == state.map.stairsY &&
             state.floor < DungeonGenerator.FINAL_FLOOR
         ) {
             if (engine.descend()) return true
         }
 
-        // 6. Loot when it is cheap and useful.
+        // 7. Loot when it is cheap, useful and can actually be picked up.
         val item = lootTarget(state)
         if (item != null && stepToward(state, engine, item[0], item[1])) return true
 
-        // 7. Objective: the stairs, or the dragon on the final floor.
+        // 8. Objective: the stairs, or the dragon on the final floor.
         val goal = objective(state) ?: return engine.waitTurn()
         if (stepToward(state, engine, goal[0], goal[1])) return true
         return engine.waitTurn()
@@ -147,36 +154,66 @@ class Bot(private val rng: Rng) {
         return intArrayOf(map.stairsX, map.stairsY)
     }
 
-    /** Healing potions (or gold right under the bot's feet) worth a detour. */
+    /**
+     * Loot worth a *short* detour.
+     *
+     * Crucially the bot only chases things it can actually pick up — chasing a
+     * piece of gear with a full pack made simulated heroes wander a floor
+     * forever instead of taking the stairs.
+     */
     private fun lootTarget(state: GameState): IntArray? {
         val p = state.player
-        val map = state.map
         val potions = countPotions(state)
+        val packFull = p.inventory.size >= Player.MAX_SLOTS
         var bestScore = Int.MAX_VALUE
         var best: IntArray? = null
-        for (gi in map.groundItems) {
-            val value = when (gi.item.type) {
-                ItemType.POTION_HEAL, ItemType.POTION_GREATER_HEAL -> if (potions < 3) 1 else 4
-                ItemType.POTION_STRENGTH, ItemType.POTION_SHIELD -> 2
-                ItemType.GOLD_PILE -> if (gi.gold >= 20) 3 else 6
-                else -> {
-                    when (gi.item.type.kind) {
-                        ItemKind.WEAPON, ItemKind.ARMOR -> 5
-                        else -> 8
-                    }
+        for (gi in state.map.groundItems) {
+            val type = gi.item.type
+            val value = when (type.kind) {
+                ItemKind.GOLD -> if (gi.gold >= 15) 2 else 5
+                ItemKind.POTION, ItemKind.SCROLL -> when {
+                    type == ItemType.POTION_STRENGTH || type == ItemType.POTION_SHIELD -> 2
+                    potions < 3 -> 1
+                    else -> 4
                 }
+                ItemKind.WEAPON, ItemKind.ARMOR -> if (!packFull && isUpgrade(p, type)) 2 else 0
             }
+            if (value == 0) continue
             val distance = Pathfinder.dist(p.x, p.y, gi.x, gi.y)
-            if (distance == 0) continue
+            if (distance == 0 || distance > LOOT_RANGE) continue
             // Deterministic jitter breaks ties between equally good targets.
             val score = distance * value + rng.nextInt(2)
-            if (score < bestScore && distance <= LOOT_RANGE) {
+            if (score < bestScore) {
                 bestScore = score
                 best = intArrayOf(gi.x, gi.y)
             }
         }
         return best
     }
+
+    private fun isUpgrade(p: Player, type: ItemType): Boolean = when (type.kind) {
+        ItemKind.WEAPON -> (p.weapon?.tier ?: 0) < type.tier
+        ItemKind.ARMOR -> (p.armor?.tier ?: 0) < type.tier
+        else -> false
+    }
+
+    /** Wearing better gear costs no turn. */
+    private fun equipUpgrades(state: GameState, engine: TurnEngine) {
+        val p = state.player
+        val better = p.inventory
+            .filter { isUpgrade(p, it.type) }
+            .maxByOrNull { it.type.tier } ?: return
+        engine.useItem(better)
+    }
+
+    private fun readScroll(state: GameState, engine: TurnEngine, type: ItemType): Boolean {
+        val scroll = state.player.inventory.firstOrNull { it.type == type && it.count > 0 }
+            ?: return false
+        return engine.useItem(scroll)
+    }
+
+    private fun visibleEnemies(state: GameState): Int =
+        state.enemies.count { it.hp > 0 && state.map.isVisible(it.x, it.y) }
 
     private fun countPotions(state: GameState): Int =
         state.player.inventory
