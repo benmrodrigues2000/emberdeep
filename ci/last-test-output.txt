@@ -136,11 +136,7 @@ CombatTest > monster attacks respect the hero's armour PASSED
 
 CombatTest > natural 20 hits even against an impossible armour class PASSED
 
-CombatTest > player attacks always deal at least one damage when they land FAILED
-    java.lang.AssertionError: damage roll: 16 not in [1, 14]
-        at org.junit.Assert.fail(Assert.java:89)
-        at com.emberdeep.game.testutil.A.within(A.kt:54)
-        at com.emberdeep.game.systems.CombatTest.player attacks always deal at least one damage when they land(CombatTest.kt:35)
+CombatTest > player attacks always deal at least one damage when they land PASSED
 
 FovTest > computing outside the map is harmless PASSED
 
@@ -158,11 +154,13 @@ PathfinderTest > unreachable and invalid targets are reported as no path PASSED
 
 PathfinderTest > searches are deterministic and allocation-free on repeat PASSED
 
-PathfinderTest > a monster blocks the player's path but not the monster's own search FAILED
-    java.lang.AssertionError: no step when blocked: expected 1 but was -1
+PathfinderTest > a monster blocks the player's path but not the monster's own search PASSED
+
+PathfinderTest > long searches on the biggest floors still find a route FAILED
+    java.lang.AssertionError: expected a walkable floor (found 44)
         at org.junit.Assert.fail(Assert.java:89)
-        at com.emberdeep.game.testutil.A.eq(A.kt:15)
-        at com.emberdeep.game.systems.PathfinderTest.a monster blocks the player's path but not the monster's own search(PathfinderTest.kt:60)
+        at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
+        at com.emberdeep.game.systems.PathfinderTest.long searches on the biggest floors still find a route(PathfinderTest.kt:148)
 
 PathfinderTest > every enemy in a generated dungeon can path to the hero PASSED
 
@@ -174,10 +172,10 @@ PathfinderTest > finds a straight path down a corridor PASSED
 
 PathfinderTest > unexplored tiles can be excluded from the search PASSED
 
-53 tests completed, 3 failed
+54 tests completed, 2 failed
 
 > Task :app:testDebugUnitTest FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791304666055.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791304868196.json
 
 FAILURE: Build failed with an exception.
 
@@ -188,5 +186,5 @@ Execution failed for task ':app:testDebugUnitTest'.
 * Try:
 > Run with --scan to get full insights.
 
-BUILD FAILED in 1m 4s
+BUILD FAILED in 40s
 23 actionable tasks: 15 executed, 8 from cache

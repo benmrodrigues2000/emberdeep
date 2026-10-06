@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| commit | `1ab359f950fe00dfa4f3190d9a9f37da7dbee984` |
+| commit | `335de54aea73df305f75550ee62bdbd485f9076c` |
 | branch | `arena/5d7dde7e-emberdeep` |
-| generated | 2026-10-06T16:39:49Z |
+| generated | 2026-10-06T16:42:37Z |
 | unit tests (exit 1) | FAIL |
 | apk/aab build (exit 0) | pass |
 
@@ -27,26 +27,10 @@ deaths by floor: F2=2  F4=3  F5=1  F6=2  F7=1  F9=2  F10=1
 	at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
 	at com.emberdeep.game.sim.SimulationTest.the dungeon can be beaten and every run terminates(SimulationTest.kt:55)
 --
-    <failure message="java.lang.AssertionError: damage roll: 16 not in [1, 14]" type="java.lang.AssertionError">java.lang.AssertionError: damage roll: 16 not in [1, 14]
+    <failure message="java.lang.AssertionError: expected a walkable floor (found 44)" type="java.lang.AssertionError">java.lang.AssertionError: expected a walkable floor (found 44)
 	at org.junit.Assert.fail(Assert.java:89)
-	at com.emberdeep.game.testutil.A.within(A.kt:54)
-	at com.emberdeep.game.systems.CombatTest.player attacks always deal at least one damage when they land(CombatTest.kt:35)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
---
-    <failure message="java.lang.AssertionError: no step when blocked: expected 1 but was -1" type="java.lang.AssertionError">java.lang.AssertionError: no step when blocked: expected 1 but was -1
-	at org.junit.Assert.fail(Assert.java:89)
-	at com.emberdeep.game.testutil.A.eq(A.kt:15)
-	at com.emberdeep.game.systems.PathfinderTest.a monster blocks the player's path but not the monster's own search(PathfinderTest.kt:60)
+	at com.emberdeep.game.testutil.A.isTrue(A.kt:36)
+	at com.emberdeep.game.systems.PathfinderTest.long searches on the biggest floors still find a route(PathfinderTest.kt:148)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -109,7 +93,7 @@ CombatTest > monster attacks respect the hero's armour PASSED
 
 CombatTest > natural 20 hits even against an impossible armour class PASSED
 
-CombatTest > player attacks always deal at least one damage when they land FAILED
-    java.lang.AssertionError: damage roll: 16 not in [1, 14]
-        at org.junit.Assert.fail(Assert.java:89)
+CombatTest > player attacks always deal at least one damage when they land PASSED
+
+FovTest > computing outside the map is harmless PASSED
 ```
