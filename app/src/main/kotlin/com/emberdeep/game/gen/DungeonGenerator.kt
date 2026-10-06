@@ -270,6 +270,8 @@ object DungeonGenerator {
     private fun spawnLoot(
         map: DungeonMap, rng: Rng, floor: Int, startRoom: Room, enemies: List<Enemy>
     ) {
+        // A degenerate floor with no rooms has nowhere to put treasure.
+        if (map.rooms.isEmpty()) return
         val drops = 3 + rng.nextInt(3)
         var attempts = 0
         var placed = 0
