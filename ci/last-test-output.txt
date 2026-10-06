@@ -21,8 +21,8 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugResources
 > Task :app:compileDebugKotlin
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:bundleDebugClassesToCompileJar
 > Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
 > Task :app:processDebugJavaRes
 
 > Task :app:compileDebugUnitTestKotlin
@@ -174,7 +174,7 @@ TurnEngineTest > the dead can no longer act PASSED
 TurnEngineTest > attacking a wall-phasing monster inside rock leaves no unreachable loot PASSED
 
 TurnEngineTest > walking into rock is refused and costs no turn PASSED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791306386928.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791306514807.json
 
-BUILD SUCCESSFUL in 53s
+BUILD SUCCESSFUL in 47s
 23 actionable tasks: 15 executed, 8 from cache

@@ -30,31 +30,35 @@ Daemon will be stopped at the end of the build
 > Task :app:mergeDebugGlobalSynthetics FROM-CACHE
 > Task :app:processDebugJavaRes UP-TO-DATE
 > Task :app:mergeDebugStartupProfile
-> Task :app:mergeDebugJniLibFolders
-> Task :app:mergeDebugNativeLibs NO-SOURCE
-> Task :app:stripDebugDebugSymbols NO-SOURCE
 > Task :app:checkDebugDuplicateClasses
-> Task :app:mergeDebugJavaResource
-> Task :app:validateSigningDebug
+> Task :app:mergeDebugJniLibFolders
 > Task :app:mergeExtDexDebug FROM-CACHE
 > Task :app:mergeLibDexDebug FROM-CACHE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:mergeDebugJavaResource
+> Task :app:mergeProjectDexDebug
+> Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
 > Task :app:buildKotlinToolingMetadata
 > Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:checkReleaseAarMetadata
 > Task :app:generateReleaseResValues FROM-CACHE
 > Task :app:mapReleaseSourceSetPaths
 > Task :app:generateReleaseResources FROM-CACHE
 > Task :app:mergeReleaseResources FROM-CACHE
 > Task :app:packageReleaseResources FROM-CACHE
 > Task :app:parseReleaseLocalResources FROM-CACHE
-> Task :app:checkReleaseAarMetadata
 > Task :app:createReleaseCompatibleScreenManifests
 > Task :app:extractDeepLinksRelease FROM-CACHE
-> Task :app:mergeProjectDexDebug
 > Task :app:processReleaseMainManifest
 > Task :app:processReleaseManifest
 > Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:processReleaseManifestForPackage
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
 > Task :app:extractProguardFiles
 > Task :app:mergeReleaseJniLibFolders
 > Task :app:mergeReleaseNativeLibs NO-SOURCE
@@ -62,9 +66,8 @@ Daemon will be stopped at the end of the build
 > Task :app:extractReleaseNativeSymbolTables NO-SOURCE
 > Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
 > Task :app:checkReleaseDuplicateClasses
-> Task :app:processReleaseManifestForPackage
-> Task :app:mergeReleaseStartupProfile
 > Task :app:mergeReleaseArtProfile
+> Task :app:mergeReleaseStartupProfile
 > Task :app:mergeReleaseShaders
 > Task :app:compileReleaseShaders NO-SOURCE
 > Task :app:generateReleaseAssets UP-TO-DATE
@@ -73,6 +76,7 @@ Daemon will be stopped at the end of the build
 > Task :app:extractReleaseVersionControlInfo
 > Task :app:processApplicationManifestReleaseForBundle
 > Task :app:collectReleaseDependencies
+> Task :app:processReleaseResources
 > Task :app:sdkReleaseDependencyData
 > Task :app:validateSigningRelease
 > Task :app:writeReleaseAppMetadata
@@ -80,10 +84,6 @@ Daemon will be stopped at the end of the build
 > Task :app:generateReleaseFeatureMetadata FROM-CACHE
 > Task :app:configureReleaseDependencies
 > Task :app:parseReleaseIntegrityConfig FROM-CACHE
-> Task :app:processReleaseResources
-> Task :app:packageDebug
-> Task :app:createDebugApkListingFileRedirect
-> Task :app:assembleDebug
 > Task :app:bundleReleaseResources
 > Task :app:compileReleaseKotlin
 > Task :app:compileReleaseJavaWithJavac NO-SOURCE
@@ -109,7 +109,7 @@ Daemon will be stopped at the end of the build
 > Task :app:lintVitalReportRelease
 > Task :app:lintVitalRelease
 > Task :app:assembleRelease
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1791306432722.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1791306561296.json
 
-BUILD SUCCESSFUL in 53s
+BUILD SUCCESSFUL in 59s
 90 actionable tasks: 59 executed, 15 from cache, 16 up-to-date
