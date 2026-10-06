@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| commit | `6ab808b71bbeb151356f4adba4873dc16c2c3f0e` |
+| commit | `a05aa88d3d9ed14157a21f542bddc3808f495302` |
 | branch | `arena/5d7dde7e-emberdeep` |
-| generated | 2026-10-06T17:05:31Z |
+| generated | 2026-10-06T17:08:03Z |
 | unit tests (exit 0) | pass |
 | apk/aab build (exit 0) | pass |
 
@@ -16,8 +16,6 @@
 ## Compiler errors and failed tasks
 
 ```
-w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdeep/game/core/GameApp.kt:36:42 'VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java
-w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdeep/game/core/GameApp.kt:36:42 'VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java
 ```
 
 ## Balance simulation

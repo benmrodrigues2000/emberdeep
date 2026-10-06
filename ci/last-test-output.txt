@@ -19,10 +19,7 @@ Daemon will be stopped at the end of the build
 > Task :app:javaPreCompileDebugUnitTest FROM-CACHE
 > Task :app:processDebugManifestForPackage
 > Task :app:processDebugResources
-
 > Task :app:compileDebugKotlin
-w: file:///home/runner/work/emberdeep/emberdeep/app/src/main/kotlin/com/emberdeep/game/core/GameApp.kt:36:42 'VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java
-
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:bundleDebugClassesToRuntimeJar
@@ -177,7 +174,7 @@ TurnEngineTest > the dead can no longer act PASSED
 TurnEngineTest > attacking a wall-phasing monster inside rock leaves no unreachable loot PASSED
 
 TurnEngineTest > walking into rock is refused and costs no turn PASSED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791306239100.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791306386928.json
 
-BUILD SUCCESSFUL in 44s
+BUILD SUCCESSFUL in 53s
 23 actionable tasks: 15 executed, 8 from cache
