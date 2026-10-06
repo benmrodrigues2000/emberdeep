@@ -41,13 +41,15 @@ class TurnEngineTest {
         return map
     }
 
-    /** A harmless punching bag: it can barely hurt the hero, so tests are stable. */
+    /**
+     * A punching bag: it cannot land a blow (attack bonus 0 and no depth bonus)
+     * and it soaks damage, so tests that measure the hero's own rules stay stable.
+     */
     private fun dummy(type: EnemyType, x: Int, y: Int, hp: Int = 999): Enemy =
         Enemy(type, x, y).apply {
             this.hp = hp
             maxHp = hp
             atk = 0
-            dmgN = 0
             dmgB = 0
         }
 
@@ -120,9 +122,14 @@ class TurnEngineTest {
         A.isTrue(engine.useWhirlwind(), "whirlwind with two adjacent enemies must fire")
         val cooldown = ClassType.FIGHTER.abilityCooldown
         A.eq(cooldown, state.player.abilityCd, "the ability must be on full cooldown")
-        repeat(cooldown - 1) { engine.waitTurn() }
+        // The dummies still get their swings in, so keep the hero standing.
+        repeat(cooldown - 1) {
+            state.player.hp = state.player.maxHp
+            engine.waitTurn()
+        }
         A.eq(1, state.player.abilityCd, "cooldown after ${cooldown - 1} turns")
         A.isFalse(engine.abilityReady(), "still recharging")
+        state.player.hp = state.player.maxHp
         engine.waitTurn()
         A.eq(0, state.player.abilityCd, "cooldown after $cooldown turns")
         A.isTrue(engine.abilityReady(), "ready again exactly after the advertised cooldown")
@@ -135,8 +142,9 @@ class TurnEngineTest {
         hero.addItem(ItemType.POTION_HEAL)
         val (engine, state) = engine(chamber(), hero, 5, 5)
         val potion = state.player.inventory.first { it.type == ItemType.POTION_HEAL }
+        val expected = (hero.hp + ItemType.POTION_HEAL.power).coerceAtMost(hero.maxHp)
         A.isTrue(engine.useItem(potion), "drinking costs a turn")
-        A.eq(5 + ItemType.POTION_HEAL.power, state.player.hp, "healed by the potion's power")
+        A.eq(expected, state.player.hp, "healed by the potion's power")
         A.isTrue(state.player.inventory.isEmpty(), "the potion is consumed")
 
         state.player.hp = state.player.maxHp - 3
