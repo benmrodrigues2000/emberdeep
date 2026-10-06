@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| commit | `fcdc30d02ece085223e3e8bab3248f2a53504cc4` |
+| commit | `6ab808b71bbeb151356f4adba4873dc16c2c3f0e` |
 | branch | `arena/5d7dde7e-emberdeep` |
-| generated | 2026-10-06T17:01:40Z |
+| generated | 2026-10-06T17:05:31Z |
 | unit tests (exit 0) | pass |
 | apk/aab build (exit 0) | pass |
 
@@ -50,6 +50,4 @@ CombatTest > natural 20 hits even against an impossible armour class PASSED
 CombatTest > player attacks always deal at least one damage when they land PASSED
 
 FovTest > computing outside the map is harmless PASSED
-    EMBERDEEP ENDGAME: turns=63 swings=21 hits=13 misses=45 heals=7 hero=20/95 dragon=-7 bossDefeated=true
-    EMBERDEEP ENDGAME LOG: You miss the The Ember Dragon. | The flames sear you for 2! | The The Ember Dragon misses you. | The Ember Cultist misses you. | You miss the The Ember Dragon. | The flames sear you for 2! | The The Ember Dragon misses you. | The Ember Cultist shoots you for 4. | You hit the The Ember Dragon for 12. | The The Ember Dragon is slain!
 ```

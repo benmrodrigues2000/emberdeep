@@ -3,8 +3,8 @@ Daemon will be stopped at the end of the build
 > Task :app:checkKotlinGradlePluginConfigurationErrors
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
-> Task :app:generateDebugResValues FROM-CACHE
 > Task :app:checkDebugAarMetadata
+> Task :app:generateDebugResValues FROM-CACHE
 > Task :app:mapDebugSourceSetPaths
 > Task :app:generateDebugResources FROM-CACHE
 > Task :app:mergeDebugResources FROM-CACHE
@@ -98,10 +98,6 @@ PlayerTest > the inventory holds ten slots and stacks consumables PASSED
 
 SimulationTest > a lone hero on floor one is never instantly killed PASSED
 
-SimulationTest > a levelled and geared hero can kill the dragon STANDARD_OUT
-    EMBERDEEP ENDGAME: turns=63 swings=21 hits=13 misses=45 heals=7 hero=20/95 dragon=-7 bossDefeated=true
-    EMBERDEEP ENDGAME LOG: You miss the The Ember Dragon. | The flames sear you for 2! | The The Ember Dragon misses you. | The Ember Cultist misses you. | You miss the The Ember Dragon. | The flames sear you for 2! | The The Ember Dragon misses you. | The Ember Cultist shoots you for 4. | You hit the The Ember Dragon for 12. | The The Ember Dragon is slain!
-
 SimulationTest > a levelled and geared hero can kill the dragon PASSED
 
 SimulationTest > twelve complete expeditions never break a structural invariant STANDARD_OUT
@@ -181,7 +177,7 @@ TurnEngineTest > the dead can no longer act PASSED
 TurnEngineTest > attacking a wall-phasing monster inside rock leaves no unreachable loot PASSED
 
 TurnEngineTest > walking into rock is refused and costs no turn PASSED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791306009324.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/tests-1791306239100.json
 
-BUILD SUCCESSFUL in 48s
+BUILD SUCCESSFUL in 44s
 23 actionable tasks: 15 executed, 8 from cache
