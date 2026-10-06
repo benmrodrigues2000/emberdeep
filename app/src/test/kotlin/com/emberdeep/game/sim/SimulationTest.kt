@@ -109,12 +109,6 @@ class SimulationTest {
         }
 
         val dragonHp = floor.enemies.firstOrNull { it.type.name == "EMBER_DRAGON" }?.hp ?: 0
-        println(
-            "EMBERDEEP ENDGAME: turns=$turns swings=${events.swings} hits=${events.strikes} " +
-                "misses=${events.misses} heals=${events.heals} hero=${hero.hp}/${hero.maxHp} " +
-                "dragon=$dragonHp bossDefeated=${state.bossDefeated}"
-        )
-        println("EMBERDEEP ENDGAME LOG: " + state.log.takeLast(10).joinToString(" | ") { it.text })
         A.isTrue(
             state.bossDefeated,
             "the dragon must be killable by a levelled hero with endgame gear " +
