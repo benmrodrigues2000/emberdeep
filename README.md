@@ -37,6 +37,31 @@ waiting at the bottom.
   recovery, autosave every 10 turns, and autosaves written on a background
   worker so saving never drops a frame
 
+## Milestones
+
+The nine-phase build plan, all delivered:
+
+| Phase | Scope | Status |
+|---|---|---|
+| 1 · Foundation | Gradle project, `SurfaceView` game loop, screen stack, sprite & audio synthesis, save manager | done |
+| 2 · Core gameplay | turn engine, d20 combat, shadowcasting FOV, A* tap-to-move, items, level-ups | done |
+| 3 · Content | 10 floors, 9 monsters + dragon boss, 3 classes, 5 weapons, 4 armours, potions, scrolls | done |
+| 4 · UI/UX | menu, class select, HUD, minimap, inventory, pause, settings, help, game over, victory | done |
+| 5 · Polish | screen shake, particles, floating combat text, difficulty curve, retry loop, haptics | done |
+| 6 · Data | run + profile saves, treasury, atomic writes, previous-good backup, background autosave | done |
+| 7 · Android | manifest, lifecycle pause/resume, immersive mode, back handling, signing config | done |
+| 8 · Testing | 10 JVM suites, structural invariants, headless balance simulation | done |
+| 9 · Release | R8-minified signed APK + AAB, CI that builds and publishes them on every push | done |
+
+### Known limitations
+
+- Audio and sprite output are synthesised in code and reviewed there; they have
+  not been heard or seen on a physical device — this environment has no
+  emulator or Android SDK to run the APK on.
+- The balance numbers come from the scripted bot, not from human playtesting;
+  the win rate it reports (roughly 1 run in 12 at seed 0xE1DE0000…) is a
+  difficulty indicator, not a player-facing statistic.
+
 ## Tech
 
 | | |
